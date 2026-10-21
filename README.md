@@ -16,6 +16,12 @@ question ──▶ retriever ──▶ chunks ──▶ generator ──▶ answ
                                        report (JSON + CSV)
 ```
 
+**Live dashboard:**
+[vidhyasmart007-rag-evaluation-testing-plat-streamlit-app-ypkaov.streamlit.app](https://vidhyasmart007-rag-evaluation-testing-plat-streamlit-app-ypkaov.streamlit.app/)
+
+It is public, it needs no sign-in, and it serves the reports committed to this
+repository. It calls no model.
+
 ---
 
 ## Quick start
@@ -973,6 +979,11 @@ The dashboard is a Streamlit app that reads the reports already in
 `reports/` and shows them. It calls no model and needs no model server,
 so the deployed copy behaves exactly like the local one.
 
+It is already deployed and public, at
+[vidhyasmart007-rag-evaluation-testing-plat-streamlit-app-ypkaov.streamlit.app](https://vidhyasmart007-rag-evaluation-testing-plat-streamlit-app-ypkaov.streamlit.app/).
+See [Deploying it publicly](#deploying-it-publicly) for how, and for what to
+expect from it.
+
 ```bash
 pip install -e ".[serve]"     # streamlit and pandas
 make serve                     # http://localhost:8501
@@ -1005,9 +1016,15 @@ and the report cannot disagree with the CSV next to it.
 
 ### Deploying it publicly
 
-The app is set up for [Streamlit Community Cloud](https://share.streamlit.io),
-which is free and needs no server of your own. The repository already has
-what the deployment reads:
+The app is deployed, and it is public:
+
+> **https://vidhyasmart007-rag-evaluation-testing-plat-streamlit-app-ypkaov.streamlit.app/**
+
+It is served by [Streamlit Community Cloud](https://share.streamlit.io), which is
+free and needs no server of your own. Open the link and you get the dashboard
+over every report in `reports/` — no sign-in, no model server, no API key.
+
+The repository already has what the deployment reads:
 
 | File | Why the deployment needs it |
 | --- | --- |
@@ -1016,25 +1033,77 @@ what the deployment reads:
 | `.streamlit/config.toml` | The theme, and `headless = true` for the cloud runtime |
 | `reports/*.json` | The reports the app reads. They are committed, so the clone the cloud makes has them |
 
-To publish it:
+#### How it was deployed, step by step
 
-1. Push the branch to GitHub. It already is: `main` on
-   `github.com/vidhyasmart007/rag-evaluation-testing-platform`.
-2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with
-   the GitHub account.
-3. Authorise the **Streamlit Community Cloud** GitHub App for that
-   repository. This is the one step that needs your account; the app
-   cannot be published on its own.
-4. Choose **New app → Deploy from a GitHub repository**, pick
-   `vidhyasmart007/rag-evaluation-testing-platform`, branch `main`, and
-   set the main file path to `streamlit_app.py`.
-5. Wait for the build. It installs `requirements.txt` and starts the app.
+This is the whole procedure, for a repository that is already on GitHub.
 
-You get a URL of the form `https://<name>.streamlit.app`. The deployment
-serves the committed reports, so a number on the public page is the number
-in `reports/`, from the run that produced it.
+**Step 1 — push the branch.** It already is: `main` on
+`github.com/vidhyasmart007/rag-evaluation-testing-platform`.
 
-Two things to know about the deployed copy:
+**Step 2 — sign in to Community Cloud and authorise the GitHub App.** Go to
+[share.streamlit.io](https://share.streamlit.io) and click **Continue to
+sign-in**. You are sent to GitHub, where you authorise the **Streamlit
+Community Cloud** app:
+
+1. GitHub shows an OAuth consent screen — *"Streamlit wants to access your
+   account"* — listing the scopes it needs (repository webhooks, read access to
+   your public repositories, and your email address). Click **Authorize
+   streamlit**.
+2. You land back on Streamlit's **Set up your account** form: first name, last
+   name, email, your functional area, what stage your app is at, and your
+   country. Fill it in and submit; the details only steer Streamlit's support
+   and onboarding mail.
+3. The workspace opens with your app list.
+
+The authorisation is what lets Community Cloud clone your repository and follow
+new commits. It is a one-time grant, and you can revoke it at any time from
+**GitHub → Settings → Applications → Installed GitHub Apps**.
+
+**Step 3 — deploy from GitHub.** In the workspace, click **Create app → Deploy
+a public app from GitHub → Deploy now**. The form has four fields:
+
+| Field | Value |
+| --- | --- |
+| Repository | `vidhyasmart007/rag-evaluation-testing-platform` |
+| Branch | `main` |
+| Main file path | `streamlit_app.py` |
+| App URL | leave blank — Streamlit assigns a subdomain |
+
+Two gotchas, both of which cost time here:
+
+* **The repository and branch fields are dropdowns, not free text.** Type the
+  name and the form will complain that *"This branch does not exist"*. Click
+  the field, pick the entry from the list, and the error clears.
+* **Wait for the validation before you press Deploy.** Pressing **Deploy**
+  while the form still shows an error does nothing at all. The subdomain field
+  validates the name asynchronously; *"This subdomain is already taken"* appears
+  a second or two after you type it.
+
+Then wait for the build. It clones the repository, installs `requirements.txt`
+with `uv`, and starts the app. The log looks like this:
+
+```text
+🚀 Starting up repository: 'rag-evaluation-testing-platform', branch: 'main',
+   main module: 'streamlit_app.py'
+🐙 Cloned repository!
+📦 Processing dependencies...
+🐍 Python dependencies were installed from .../requirements.txt using uv.
+Uvicorn server started on :::8501
+```
+
+**Step 4 — check the sharing setting.** The app card's **⋮ → Settings →
+Sharing** has a *"Who can view this app"* dropdown. It has to read
+*"This app is public and searchable"*; the other option, *"Only specific people
+can view this app"*, is what makes the URL ask for a sign-in.
+
+**One thing that looks like a failure and is not.** If you check the live URL
+with `curl`, you get `303` and a redirect to
+`share.streamlit.io/-/auth/app`. That is not the app refusing you. Streamlit
+Cloud sends *every* request that does not look like a browser through that
+handshake first — a known public app such as `gdp-dashboard.streamlit.app`
+answers `curl` in exactly the same way. Open the URL in a browser and it loads.
+
+#### Two things to know about the deployed copy
 
 * **It is not a live demo.** No model runs when a page is opened. The
   reports are the ones committed to the repository, so the public page
@@ -1365,7 +1434,8 @@ principle: the app **reads the reports** rather than recomputing anything,
 so what a reader sees on the public page is exactly what the run recorded.
 It calls no model, which is why the deployed copy needs no model server and
 why the numbers on the page cannot drift away from the numbers in the
-repository.
+repository. The deployment is live and public at
+[vidhyasmart007-rag-evaluation-testing-plat-streamlit-app-ypkaov.streamlit.app](https://vidhyasmart007-rag-evaluation-testing-plat-streamlit-app-ypkaov.streamlit.app/).
 
 ---
 
