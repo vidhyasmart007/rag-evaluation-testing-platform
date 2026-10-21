@@ -17,7 +17,7 @@ JUDGE_PROVIDER ?= ollama
 JUDGE_MODEL ?= llama3.2:3b
 
 .PHONY: help install run test cases config retrieve compare compare-generators \
-	validate-judge lint clean
+	validate-judge serve lint clean
 
 help:
 	@echo "Targets:"
@@ -30,6 +30,7 @@ help:
 	@echo "  compare   compare the lexical, dense and hybrid retrievers"
 	@echo "  compare-generators  compare the extractive baseline against a model"
 	@echo "  validate-judge  grade the hand labels and measure the judge"
+	@echo "  serve     run the dashboard locally on http://localhost:8501"
 	@echo "  lint      run ruff and mypy"
 	@echo "  clean     remove caches and generated reports"
 
@@ -71,8 +72,11 @@ validate-judge:
 		--set judge.model=$(JUDGE_MODEL) \
 		--set judge.think=false
 
+serve:
+	$(PYTHON) -m streamlit run streamlit_app.py
+
 lint:
-	$(PYTHON) -m ruff check src tests
+	$(PYTHON) -m ruff check src tests streamlit_app.py
 	$(PYTHON) -m mypy src
 
 clean:

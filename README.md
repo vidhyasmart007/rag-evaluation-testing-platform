@@ -52,7 +52,16 @@ make config    # print the effective configuration
 make retrieve QUESTION="Where is the office?"
 make compare   # compare the three retrievers
 make compare-generators MODEL=qwen3:1.7b   # compare the generators
+make serve     # run the dashboard on http://localhost:8501
 make install   # editable install, with a macOS fix (see Troubleshooting)
+```
+
+The dashboard needs Streamlit, which is an optional extra rather than a
+dependency of the framework:
+
+```bash
+pip install -e ".[serve]"
+make serve
 ```
 
 The evaluation runs with the extractive generator by default, so it needs
@@ -89,6 +98,7 @@ PYTHONPATH=src python -m rageval.cli run \
 │   ├── reporting.py            # JSON + CSV writers
 │   ├── cli.py                  # thin command line wrapper
 │   ├── compare.py              # runs the arms of a comparison and tabulates them
+│   ├── dashboard.py            # reads the reports for the dashboard
 │   ├── retrieval/
 │   │   ├── base.py             # Retriever protocol
 │   │   ├── lexical.py          # sentence splitting, chunking, BM25
@@ -114,16 +124,18 @@ PYTHONPATH=src python -m rageval.cli run \
 │   └── metrics/
 │       ├── answer.py           # token_f1, exact_match, faithfulness, ...
 │       └── retrieval.py        # hit@k, recall@k, precision@k, MRR
-├── tests/                      # 293 tests
+├── tests/                      # 324 tests
+├── streamlit_app.py            # the dashboard, a thin wrapper over dashboard.py
+├── requirements.txt            # what the public deployment installs
+├── .streamlit/config.toml      # the dashboard's theme and settings
 ├── Makefile
 └── pyproject.toml
 ```
 
 The important structural decision: **all evaluation logic lives in `runner.py`**.
-The CLI, the HTTP API and the dashboard are thin wrappers around
-`run_evaluation(config)`. When the UI arrives it will call the same function the
-command line calls, so a score in the dashboard and a score in a CSV can never
-disagree.
+The CLI and the dashboard are thin wrappers around `run_evaluation(config)`
+and around the reports it writes. A score in the dashboard and a score in a
+CSV can never disagree, because neither of them computes a score.
 
 ---
 
@@ -257,6 +269,7 @@ PYTHONPATH=src python -m rageval.compare --axis generator --model qwen3:1.7b
 | `validate-judge` | Grade the hand-labelled set and report the judge's agreement with the labels |
 | `rageval.compare` | Run all three retrievers on the same dataset and print the metrics that differ |
 | `rageval.compare --axis generator` | Compare the extractive baseline against the language model |
+| `streamlit run streamlit_app.py` | Run the dashboard over the reports in `reports/` |
 
 `rageval.compare` writes its reports to a temporary directory, so running a
 comparison never clobbers the baseline in `reports/`.
@@ -954,6 +967,93 @@ knowing before trusting the floors on a new dataset.
 
 ---
 
+## The dashboard
+
+The dashboard is a Streamlit app that reads the reports already in
+`reports/` and shows them. It calls no model and needs no model server,
+so the deployed copy behaves exactly like the local one.
+
+```bash
+pip install -e ".[serve]"     # streamlit and pandas
+make serve                     # http://localhost:8501
+```
+
+or without installing anything:
+
+```bash
+python -m pip install streamlit pandas
+python -m streamlit run streamlit_app.py
+```
+
+Four tabs:
+
+| Tab | What it shows |
+| --- | --- |
+| **Overview** | The headline metrics of the selected run, how that run was configured, every metric the report recorded, and a chart of one metric across all runs |
+| **Cases** | Every case in the run, filtered by answerability and verdict, with the answer, the reference, the judge's reason, and the chunks that were retrieved with their scores |
+| **Judge validation** | Cohen's κ against the hand labels over both subsets, the judge's self-consistency, the mean rubric scores, and every item where a rater disagreed with the labels |
+| **About** | What the numbers are and what they are not |
+
+The code follows the same rule as the CLI: everything it computes lives in
+`src/rageval/dashboard.py`, and `streamlit_app.py` at the repository root
+only draws it. That is what lets the dashboard's logic be tested without
+Streamlit installed at all — 21 of the tests never import it.
+
+**The dashboard never recomputes a metric.** Every number it shows is read
+out of the JSON a run wrote, so the page cannot disagree with the report
+and the report cannot disagree with the CSV next to it.
+
+### Deploying it publicly
+
+The app is set up for [Streamlit Community Cloud](https://share.streamlit.io),
+which is free and needs no server of your own. The repository already has
+what the deployment reads:
+
+| File | Why the deployment needs it |
+| --- | --- |
+| `streamlit_app.py` | The app, at the repository root where Cloud looks for it |
+| `requirements.txt` | `streamlit` and `pandas`, the only two dependencies of the app |
+| `.streamlit/config.toml` | The theme, and `headless = true` for the cloud runtime |
+| `reports/*.json` | The reports the app reads. They are committed, so the clone the cloud makes has them |
+
+To publish it:
+
+1. Push the branch to GitHub. It already is: `main` on
+   `github.com/vidhyasmart007/rag-evaluation-testing-platform`.
+2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with
+   the GitHub account.
+3. Authorise the **Streamlit Community Cloud** GitHub App for that
+   repository. This is the one step that needs your account; the app
+   cannot be published on its own.
+4. Choose **New app → Deploy from a GitHub repository**, pick
+   `vidhyasmart007/rag-evaluation-testing-platform`, branch `main`, and
+   set the main file path to `streamlit_app.py`.
+5. Wait for the build. It installs `requirements.txt` and starts the app.
+
+You get a URL of the form `https://<name>.streamlit.app`. The deployment
+serves the committed reports, so a number on the public page is the number
+in `reports/`, from the run that produced it.
+
+Two things to know about the deployed copy:
+
+* **It is not a live demo.** No model runs when a page is opened. The
+  reports are the ones committed to the repository, so the public page
+  shows the same numbers as the README.
+* **Only the committed reports are there.** The framework writes a new
+  report for every run and `reports/` is otherwise gitignored, so a new
+  run appears in the local dashboard but not in the public one until it is
+  committed.
+
+### Adding the dashboard to the rest of the project
+
+The framework itself still has **no runtime dependencies**. Streamlit and
+pandas are an optional extra (`serve`), used only by the app. Everything
+else — the runner, the retrievers, the generators, the judge, the CLI — is
+standard library only, and the whole test suite runs without anything
+installed but pytest.
+
+---
+
 ## Current baseline
 
 ### The retrievers
@@ -1225,6 +1325,12 @@ runs, 17 produced identical answers and 2 differed on a single case. The seed
 fixes the sampling, not the GPU arithmetic. The response cache is what makes a
 run exactly reproducible.
 
+**10. The dashboard shows reports, not runs.** The app reads the JSON that a
+run wrote. It never calls a model, so the deployed copy needs no model server
+and cannot show a number the repository does not hold. The cost of that
+choice is that the public page only changes when a report is committed — it
+is not a live view of a running pipeline.
+
 Two dataset questions were rewritten during calibration because the framework
 surfaced genuine ambiguity in them — the original wording collided with an
 unrelated sentence in the corpus. Those rewrites are recorded in the git
@@ -1241,9 +1347,9 @@ history, and they are a fair illustration of what a test set goes through.
 | **2** ✅ | Dense retrieval (Ollama embeddings) and a hybrid retriever, with the same `Retriever` interface |
 | **3** ✅ | LLM answer generation via Ollama, seeded for reproducibility, with the extractive baseline kept as a comparison arm |
 | **4** ✅ | LLM-as-judge on a different model family, validated against hand labels with Cohen's κ before it is trusted |
-| **5** | Streamlit dashboard, then a public deployment |
+| **5** ✅ | Streamlit dashboard, then a public deployment |
 
-The dashboard comes last on purpose. A UI over broken metrics is a UI over
+The dashboard came last on purpose. A UI over broken metrics is a UI over
 broken metrics.
 
 Phase 4 delivered what it was asked for, with the caveat it was supposed to
@@ -1253,6 +1359,13 @@ On the 65 hand-labelled answers the judge reaches κ 0.93 against the token
 rule's 0.70, and it gets two of the 65 wrong. The validation also turned up
 a defect in the framework's own aggregation, which is written up under
 *What the validation found in the framework*.
+
+Phase 5 delivered the dashboard and the deployment for it, on the same
+principle: the app **reads the reports** rather than recomputing anything,
+so what a reader sees on the public page is exactly what the run recorded.
+It calls no model, which is why the deployed copy needs no model server and
+why the numbers on the page cannot drift away from the numbers in the
+repository.
 
 ---
 
@@ -1277,20 +1390,25 @@ left to rot, and this README replaced the one that described them.
 make test          # or: python -m pytest
 ```
 
-293 tests across fourteen modules. They cover the tokenizer and stemmer, chunking
+324 tests across sixteen modules. They cover the tokenizer and stemmer, chunking
 and BM25 ranking, every metric, dataset validation and the legacy format,
 configuration overrides and the no-secrets rule, generator abstention, the
 response cache, the embedding client, the dense and hybrid retrievers, the
 language model generator (request shape, JSON parsing, abstention, timeouts and
 HTTP failures), the judge (the rubric, the reply parsing, the aggregation, the
 order swap, both transports, Cohen's κ, the label file and the validation
-report), the retriever and generator comparisons, and the runner end to end
-including the report files it writes.
+report), the dashboard's reading logic, the retriever and generator
+comparisons, and the runner end to end including the report files it writes.
 
 **The suite needs no model server.** The HTTP layers of the embedding client,
 the language model generator and both judges are replaced, and the dense and
 hybrid retrievers are driven by a fake embedder, so `make test` passes on a
 machine where Ollama is not installed at all.
+
+The dashboard's own tests do not need Streamlit either: the logic lives in
+`src/rageval/dashboard.py` and is tested on its own. Six further tests run the
+app itself through Streamlit's headless harness and skip when Streamlit is
+not installed.
 
 The suite runs with no install step: `pyproject.toml` sets
 `pythonpath = ["src"]` for pytest.

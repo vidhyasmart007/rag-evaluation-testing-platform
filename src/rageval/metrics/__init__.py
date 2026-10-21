@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from rageval.metrics.answer import (
-    exact_match,
     evaluate_answer_relevance,
     evaluate_faithfulness,
+    exact_match,
     numeric_match,
     token_f1,
     token_recall,

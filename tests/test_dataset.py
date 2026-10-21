@@ -174,7 +174,12 @@ def test_unanswerable_cases_are_counted_separately(tmp_path):
         tmp_path / "dataset.json",
         [
             {"id": 1, "question": "Where?", "reference_answer": "Here"},
-            {"id": 2, "question": "Who is the CEO?", "reference_answer": "", "answerable": False},
+            {
+                "id": 2,
+                "question": "Who is the CEO?",
+                "reference_answer": "",
+                "answerable": False,
+            },
         ],
     )
     dataset = load_dataset(path)

@@ -31,7 +31,9 @@ DATASET = {
         {
             "id": 2,
             "question": "How many annual leave days do employees receive?",
-            "reference_answer": "Employees receive 18 annual leave days per calendar year.",
+            "reference_answer": (
+                "Employees receive 18 annual leave days per calendar year."
+            ),
             "answerable": True,
             "relevant_sentence_ids": [2],
         },

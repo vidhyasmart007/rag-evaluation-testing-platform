@@ -10,8 +10,18 @@ from rageval.retrieval.lexical import Chunk
 
 def make_chunks() -> list[Chunk]:
     return [
-        Chunk(chunk_id=0, text="The office is in Bengaluru.", sentence_ids=(0,), word_count=5),
-        Chunk(chunk_id=1, text="Employees get 18 leave days.", sentence_ids=(1,), word_count=5),
+        Chunk(
+            chunk_id=0,
+            text="The office is in Bengaluru.",
+            sentence_ids=(0,),
+            word_count=5,
+        ),
+        Chunk(
+            chunk_id=1,
+            text="Employees get 18 leave days.",
+            sentence_ids=(1,),
+            word_count=5,
+        ),
         Chunk(chunk_id=2, text="Backups run nightly.", sentence_ids=(2,), word_count=3),
     ]
 

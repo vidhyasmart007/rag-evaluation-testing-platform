@@ -28,7 +28,8 @@ have to remember them.
 from __future__ import annotations
 
 from collections import Counter
-from typing import Any, Hashable, Sequence
+from collections.abc import Hashable, Sequence
+from typing import Any
 
 #: The Landis and Koch bands for a kappa.
 KAPPA_BANDS = (
@@ -60,7 +61,7 @@ def _confusion(
     counts: dict[Hashable, dict[Hashable, int]] = {
         row: {column: 0 for column in categories} for row in categories
     }
-    for left, right in zip(first, second):
+    for left, right in zip(first, second, strict=True):
         counts[left][right] += 1
     return counts
 
@@ -88,7 +89,7 @@ def cohen_kappa(
     first_counts = Counter(first)
     second_counts = Counter(second)
 
-    observed = sum(1 for a, b in zip(first, second) if a == b) / total
+    observed = sum(1 for a, b in zip(first, second, strict=True) if a == b) / total
     expected = sum(
         (first_counts.get(category, 0) / total)
         * (second_counts.get(category, 0) / total)
@@ -138,7 +139,7 @@ def weighted_kappa(
         return (distance / span) ** 2
 
     observed_sum = sum(
-        weight(a, b) for a, b in zip(first, second)
+        weight(a, b) for a, b in zip(first, second, strict=True)
     )
     first_counts = Counter(first)
     second_counts = Counter(second)
@@ -179,7 +180,7 @@ def agreement(
         categories = sorted(set(first) | set(second), key=str)
 
     total = len(first)
-    observed = sum(1 for a, b in zip(first, second) if a == b) / total
+    observed = sum(1 for a, b in zip(first, second, strict=True) if a == b) / total
     kappa = cohen_kappa(first, second)
 
     return {

@@ -307,6 +307,7 @@ class EvalConfig:
 
     def _set_dotted(self, dotted: str, value: Any) -> None:
         parts = dotted.split(".")
+        target: Any
         if len(parts) == 1:
             target = self
             name = parts[0]

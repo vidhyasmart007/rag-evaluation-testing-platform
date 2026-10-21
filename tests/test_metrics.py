@@ -22,8 +22,14 @@ from rageval.metrics.retrieval import (
 from rageval.schema import RetrievedChunk
 
 
-def chunk(chunk_id: int, sentence_ids: tuple[int, ...], score: float = 0.5) -> RetrievedChunk:
-    return RetrievedChunk(chunk_id=chunk_id, text="", score=score, sentence_ids=sentence_ids)
+def chunk(
+    chunk_id: int,
+    sentence_ids: tuple[int, ...],
+    score: float = 0.5,
+) -> RetrievedChunk:
+    return RetrievedChunk(
+        chunk_id=chunk_id, text="", score=score, sentence_ids=sentence_ids
+    )
 
 
 def test_token_f1_is_one_for_an_identical_answer():
@@ -31,7 +37,9 @@ def test_token_f1_is_one_for_an_identical_answer():
 
 
 def test_token_f1_ignores_stop_words_and_stems():
-    assert token_f1("The office is in Bengaluru", "office bengaluru") == pytest.approx(1.0)
+    assert token_f1("The office is in Bengaluru", "office bengaluru") == pytest.approx(
+        1.0
+    )
 
 
 def test_token_f1_is_zero_when_nothing_is_shared():
@@ -69,7 +77,10 @@ def test_faithfulness_drops_when_the_answer_invents_content():
 
 
 def test_answer_relevance_measures_the_overlap_with_the_question():
-    assert evaluate_answer_relevance("Where is the office?", "The office is in Bengaluru") == pytest.approx(1.0)
+    relevance = evaluate_answer_relevance(
+        "Where is the office?", "The office is in Bengaluru"
+    )
+    assert relevance == pytest.approx(1.0)
     assert evaluate_answer_relevance("Where is the office?", "Unrelated content") < 0.5
 
 

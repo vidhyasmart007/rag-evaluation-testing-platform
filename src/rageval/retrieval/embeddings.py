@@ -21,7 +21,8 @@ from __future__ import annotations
 import json
 import urllib.error
 import urllib.request
-from typing import Protocol, Sequence, runtime_checkable
+from collections.abc import Sequence
+from typing import Protocol, runtime_checkable
 
 from rageval.cache import DiskCache
 
@@ -167,7 +168,7 @@ class CachedEmbedder:
         vectors: list[list[float] | None] = []
         missing: list[tuple[int, str, str]] = []
 
-        for index, (text, key) in enumerate(zip(items, keys)):
+        for index, (text, key) in enumerate(zip(items, keys, strict=True)):
             cached = self.cache.get(key)
             if cached is None:
                 vectors.append(None)
@@ -186,7 +187,7 @@ class CachedEmbedder:
                 raise EmbeddingError(
                     f"Expected {len(missing)} embeddings but got {len(computed)}."
                 )
-            for (index, _, key), vector in zip(missing, computed):
+            for (index, _, key), vector in zip(missing, computed, strict=True):
                 vectors[index] = vector
                 self.cache.set(key, {"embedding": vector})
 

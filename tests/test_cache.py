@@ -186,7 +186,7 @@ def test_a_generation_result_round_trips_through_the_cache(tmp_path):
 
 
 def test_the_cache_directory_is_created_lazily(tmp_path):
-    cache = DiskCache(tmp_path / "nested" / "cache")
+    DiskCache(tmp_path / "nested" / "cache")
     assert (tmp_path / "nested" / "cache").is_dir()
 
 

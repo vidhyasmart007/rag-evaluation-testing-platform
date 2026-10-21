@@ -22,8 +22,9 @@ from __future__ import annotations
 import argparse
 import copy
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from rageval.config import EvalConfig
 from rageval.runner import run_evaluation
@@ -66,6 +67,31 @@ GENERATOR_METRICS = (
     ("error_count", "errors"),
 )
 
+
+def _retriever_arm(name: str) -> Callable[[EvalConfig], None]:
+    """Build the hook that selects one retriever for an arm."""
+
+    def configure(run_config: EvalConfig) -> None:
+        run_config.retrieval.retriever = name
+
+    return configure
+
+
+def _generator_arm(provider: str, model: str) -> Callable[[EvalConfig], None]:
+    """Build the hook that selects one generator for an arm.
+
+    The cache is switched off here as well as in the caller, so that an arm
+    reports the cost of the model rather than the cost of a cache lookup.
+    """
+
+    def configure(run_config: EvalConfig) -> None:
+        run_config.generation.provider = provider
+        run_config.generation.model = model
+        run_config.use_cache = False
+
+    return configure
+
+
 def _run_arm(
     config: EvalConfig,
     workspace: Path,
@@ -101,9 +127,7 @@ def compare_retrievers(config: EvalConfig) -> dict[str, dict[str, Any]]:
                 config,
                 workspace,
                 name,
-                lambda run_config, chosen=name: setattr(
-                    run_config.retrieval, "retriever", chosen
-                ),
+                _retriever_arm(name),
             )
 
     return results
@@ -138,11 +162,7 @@ def compare_generators(config: EvalConfig) -> dict[str, dict[str, Any]]:
                 config,
                 workspace,
                 name,
-                lambda run_config, p=provider, m=model: (
-                    setattr(run_config.generation, "provider", p),
-                    setattr(run_config.generation, "model", m),
-                    setattr(run_config, "use_cache", False),
-                ),
+                _generator_arm(provider, model),
             )
 
     return results

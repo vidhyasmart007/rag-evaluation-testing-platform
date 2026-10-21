@@ -13,8 +13,8 @@ keywords = ["rag", "evaluation", "llm", "retrieval", "testing"]
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
-serve = ["streamlit>=1.40"]
+dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11"]
+serve = ["streamlit>=1.40", "pandas>=2.0"]
 
 [project.scripts]
 rag-eval = "rageval.cli:main"

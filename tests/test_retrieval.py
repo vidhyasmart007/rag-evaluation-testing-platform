@@ -92,7 +92,8 @@ def test_a_question_the_corpus_cannot_answer_scores_zero():
 
 def test_the_relevance_floor_drops_unrelated_chunks():
     retriever = BM25Retriever(build_chunks(SENTENCES, chunk_size=100, overlap=0))
-    assert retriever.retrieve("What is the capital of Mars?", top_k=4, min_score=0.15) == []
+    found = retriever.retrieve("What is the capital of Mars?", top_k=4, min_score=0.15)
+    assert found == []
 
 
 def test_top_k_limits_the_number_of_chunks():

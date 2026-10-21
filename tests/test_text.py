@@ -69,7 +69,8 @@ def test_weighted_coverage_punishes_a_missing_rare_term_harder():
     # score down because the rare term is the one that is missing.
     assert plain == pytest.approx(0.5)
     assert weighted < plain
-    assert weighted_coverage(set(stemmed_tokens("office")), documents[0], weights) == pytest.approx(1.0)
+    single = weighted_coverage(set(stemmed_tokens("office")), documents[0], weights)
+    assert single == pytest.approx(1.0)
 
 
 def test_token_counts_are_multisets():

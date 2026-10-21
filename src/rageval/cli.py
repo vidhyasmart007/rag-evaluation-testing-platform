@@ -8,7 +8,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from rageval import paths
 from rageval.config import EvalConfig
 from rageval.dataset import load_dataset
 from rageval.runner import run_evaluation

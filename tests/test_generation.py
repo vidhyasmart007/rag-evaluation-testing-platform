@@ -26,7 +26,8 @@ def test_abstains_when_the_context_is_empty():
 
 def test_abstains_when_the_context_does_not_address_the_question():
     generator = ExtractiveGenerator()
-    result = generator.generate("What is the name of the chief executive officer?", CONTEXT)
+    question = "What is the name of the chief executive officer?"
+    result = generator.generate(question, CONTEXT)
     assert result.abstained
     assert result.text == ABSTAINED_ANSWER
 

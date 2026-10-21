@@ -235,7 +235,7 @@ def aggregate(raws: list[RawJudgement], threshold: int = 4) -> Judgement:
     # explanation shown to a reader is the explanation for the answer that
     # was reported.
     reason = ""
-    for raw, value in zip(raws, verdicts):
+    for raw, value in zip(raws, verdicts, strict=True):
         if value == verdict and raw.reason:
             reason = raw.reason
             break
