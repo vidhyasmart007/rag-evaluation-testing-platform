@@ -97,12 +97,6 @@ def test_a_missing_knowledge_base_is_reported(tmp_path, dataset_path):
         run_evaluation(config)
 
 
-def test_the_judge_is_not_implemented_yet(config):
-    config.judge.enabled = True
-    with pytest.raises(NotImplementedError):
-        run_evaluation(config)
-
-
 def test_an_unknown_retriever_is_rejected(config):
     config.retrieval.retriever = "magic"
     with pytest.raises(ValueError, match="Unknown retriever"):

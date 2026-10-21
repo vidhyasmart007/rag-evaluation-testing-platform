@@ -73,7 +73,8 @@ PYTHONPATH=src python -m rageval.cli run \
 .
 ├── data/
 │   ├── knowledge_base.txt      # the source document (16 sentences)
-│   └── eval_dataset.json       # 21 evaluation cases, schema v2
+│   ├── eval_dataset.json       # 21 evaluation cases, schema v2
+│   └── hand_labels.json        # 65 hand-labelled answers, for validating the judge
 ├── reports/
 │   ├── latest.json             # full report of the most recent run
 │   └── latest.csv              # the same run, one row per case
@@ -99,10 +100,21 @@ PYTHONPATH=src python -m rageval.cli run \
 │   │   ├── extractive.py       # baseline generator
 │   │   ├── ollama.py           # language model generator
 │   │   └── cached.py           # disk memoisation for any generator
+│   ├── judge/
+│   │   ├── base.py             # JudgeItem, Judgement, aggregation, the verdict rule
+│   │   ├── rubric.py           # the rubric prompt and how its reply is read
+│   │   ├── judge.py            # RubricJudge: n samples x 2 orders
+│   │   ├── ollama.py           # local judge, through Ollama's native chat API
+│   │   ├── openai_compat.py    # hosted judge, through an OpenAI-compatible API
+│   │   ├── cached.py           # disk memoisation for any judge
+│   │   ├── agreement.py        # Cohen's kappa, weighted kappa, confusion matrices
+│   │   ├── labels.py           # the hand-labelled validation set
+│   │   ├── collect.py          # builds the label file from a set of run reports
+│   │   └── validation.py       # grades the labelled set and measures the judge
 │   └── metrics/
 │       ├── answer.py           # token_f1, exact_match, faithfulness, ...
 │       └── retrieval.py        # hit@k, recall@k, precision@k, MRR
-├── tests/                      # 226 tests
+├── tests/                      # 293 tests
 ├── Makefile
 └── pyproject.toml
 ```
@@ -179,6 +191,12 @@ The loader also accepts the legacy flat list format and reports a warning.
 | `token_f1` | Harmonic mean of precision and recall over tokens | 0–1 |
 | `numeric_match` | Numbers in the answer match the reference | 0–1 |
 | `answer_correct` | The headline answer score | 0–1 |
+| `judge_correct` | The judge's verdict on the answer | 0–1 |
+| `judge_correctness` | The rubric's correctness score | 1–5 |
+| `judge_relevance` | The rubric's relevance score | 1–5 |
+| `judge_groundedness` | The rubric's groundedness score | 1–5 |
+| `judge_completeness` | The rubric's completeness score | 1–5 |
+| `judge_token_agreement` | The judge and the token rule reached the same verdict | 0–1 |
 | `abstention_correct` | Answered iff the case was answerable | 0–1 |
 | `unanswerable_abstention_rate` | Of the unanswerable cases, how many were refused | 0–1 |
 | `unanswerable_rejection_rate` | Of the unanswerable cases, how many were turned away by the retriever | 0–1 |
@@ -225,6 +243,7 @@ PYTHONPATH=src python -m rageval.cli run
 PYTHONPATH=src python -m rageval.cli cases
 PYTHONPATH=src python -m rageval.cli config
 PYTHONPATH=src python -m rageval.cli retrieve "How many leave days do employees get?"
+PYTHONPATH=src python -m rageval.cli validate-judge --labels data/hand_labels.json
 PYTHONPATH=src python -m rageval.compare
 PYTHONPATH=src python -m rageval.compare --axis generator --model qwen3:1.7b
 ```
@@ -235,6 +254,7 @@ PYTHONPATH=src python -m rageval.compare --axis generator --model qwen3:1.7b
 | `cases` | List the dataset cases and any loader warnings |
 | `config` | Print the effective configuration as JSON |
 | `retrieve` | Show what the retriever returns for one question |
+| `validate-judge` | Grade the hand-labelled set and report the judge's agreement with the labels |
 | `rageval.compare` | Run all three retrievers on the same dataset and print the metrics that differ |
 | `rageval.compare --axis generator` | Compare the extractive baseline against the language model |
 
@@ -424,7 +444,400 @@ that the table below and the evidence on disk agree.
 
 ---
 
-## Configuration
+## The judge
+
+The token rule is the reason this phase exists. `token_recall >= 0.9` marks
+*"Bengaluru"* wrong for *"Which city is the office in?"*, and a rule that does
+that is not measuring correctness. But a judge is not automatically better than
+a rule, so the judge in this framework has to earn its place: it is measured
+against hand labels with Cohen's κ, and the number is reported whether it is
+flattering or not.
+
+### What the judge is asked
+
+The judge sees four things and returns one JSON object:
+
+```json
+{
+  "my_answer": "Bengaluru, Karnataka",
+  "correctness": 5,
+  "relevance": 5,
+  "groundedness": 5,
+  "completeness": 5,
+  "reason": "the answer names the city the sources give"
+}
+```
+
+`correctness`, `relevance`, `groundedness` and `completeness` are each an
+integer from 1 to 5. `my_answer` is the judge's **own** answer to the question,
+written before it looks at the answer being graded, and it is the part that
+makes the rubric work.
+
+### Why the judge answers the question first
+
+An earlier version of the rubric graded the answer against the sources. It
+graded it well: the answer matched the sources, so it was grounded. It also
+passed *"Employees receive 18 annual leave days per calendar year."* as the
+correct answer to *"How many sick leave days do employees receive?"*, and its
+own reason for doing so read *"it specifies annual leave days, not sick
+leave"*. The model could see the mismatch and graded through it anyway.
+
+Asking the judge to answer the question first fixes it, because the comparison
+then has something to be a comparison with. For that question the judge writes
+*"the sources do not say"*, and the answer under test plainly says something
+else. The mismatch stops being a judgement call.
+
+Two rules in the rubric carry the weight:
+
+- **The answer is graded as a response to the question.** The sources contain
+  many facts; only one of them answers this question. Being true and being
+  supported by the sources is not enough.
+- **A refusal is graded by looking for the answer.** If the sources or the
+  reference answer contain an answer to *this* question, the decline is wrong
+  and the correctness score is 1. If neither does, the decline is right and
+  all four scores are 5.
+
+The second rule is why the judge scores a refusal that happens to be wrong as
+1 rather than as a well-formed non-answer. A refusal has to be right for the
+right reason.
+
+### The verdict is derived, not asked for
+
+The judge is asked for the four scores only. The binary verdict is computed
+from the correctness score by a single threshold (`judge.threshold`, default 4).
+Two fields that can contradict each other is one field too many: a judge asked
+for both a score and a verdict will eventually produce a 5 and an "incorrect",
+and then the framework has to decide which one to believe.
+
+The scores are aggregated with the **lower median** and the verdict by a
+**strict majority** of the samples, so a single wild sample cannot move the
+result. The lower median is the smaller of the two middle samples rather
+than their average: an average would report a score that no sample produced,
+and three samples of 3 against three of 5 would be reported as a correctness
+of 4 while the verdict said "incorrect".
+
+The two are the same rule applied to the same numbers, so **the score the
+report shows and the verdict the report gives can never contradict each
+other**. A reader who sees `correctness: 3` and knows the threshold was 4
+can work out the verdict without guessing. A judge that is exactly undecided
+does not get to call an answer correct: a tie goes against "correct", and the
+tie is reported separately through the sample agreement.
+
+### The judge is asked twice, in both orders
+
+`judge.n_samples` is 3 and `judge.swap_order` is on, so each answer is graded
+**six times**: three samples with the reference answer first and three with the
+answer to be graded first.
+
+The order swap is the check on the judge rather than on the answer. A judge
+that changes its verdict when the two blocks swap places is sensitive to
+position rather than to content, and its verdict is then measuring the prompt
+layout. Both numbers come out of the run:
+
+| Measure | What it says |
+| --- | --- |
+| `sample_agreement` | The share of the six samples that agreed with the majority verdict |
+| `order_consistent` | Whether the two orders reached the same verdict |
+
+`order_consistent` is `null` when the order was not swapped, so that "not
+tested" never reads as "passed".
+
+### Which model does the judging
+
+The judge should be a **different model family** from the generator, or it
+tends to score its own phrasing higher than it deserves. The framework cannot
+enforce that from the outside, so it is worth checking by hand.
+
+| Provider | Model | Notes |
+| --- | --- | --- |
+| `gemini` | `gemini-3.8-flash` | The default. Free tier, different family from the generator. Needs `GEMINI_API_KEY`. |
+| `ollama` | `llama3.2:3b` | The local fallback. Free, offline, and a different family from the generator. |
+
+Both are implemented against the same `ChatClient` interface, so the rubric,
+the parsing and the aggregation are literally the same code in both cases:
+
+- The local judge uses Ollama's **native** `/api/chat` endpoint, for the same
+  reason the generator does: only the native endpoint honours `think`.
+- The hosted judge uses an OpenAI-compatible `/chat/completions` endpoint with
+  `response_format: {"type": "json_object"}`, which is what Gemini's
+  OpenAI-compatible surface offers.
+
+The API key is read from the environment variable named in
+`judge.api_key_env` and is never written to a configuration file.
+
+```bash
+ollama pull llama3.2:3b       # 2.0 GB, the local judge
+
+# The local judge
+PYTHONPATH=src python -m rageval.cli validate-judge \
+  --labels data/hand_labels.json \
+  --set judge.provider=ollama \
+  --set judge.model=llama3.2:3b \
+  --set judge.think=false
+
+# The hosted judge
+export GEMINI_API_KEY=...
+PYTHONPATH=src python -m rageval.cli validate-judge \
+  --labels data/hand_labels.json \
+  --set judge.provider=gemini
+```
+
+### The judge in a normal run
+
+```bash
+PYTHONPATH=src python -m rageval.cli run \
+  --set generation.provider=ollama \
+  --set generation.model=qwen3:1.7b \
+  --set judge.enabled=true \
+  --set judge.provider=ollama \
+  --set judge.model=llama3.2:3b \
+  --set judge.think=false
+```
+
+Each case then carries `judge_correct`, the four rubric scores and
+`judge_token_agreement` — the share of cases where the judge and the token
+rule reached the same conclusion. They do not always, and that is the point:
+the disagreement is where the token rule is wrong.
+
+A judge that cannot be reached costs one case its verdict, not the case. The
+retrieval and the generation still happened, and what they produced is still
+reported.
+
+---
+
+## Validating the judge
+
+A judge that scores well on its own is evidence of nothing. The evidence is
+agreement with a person.
+
+The measurement below was made with the **local** judge, `llama3.2:3b` from
+Meta, on the full protocol: three samples per order, both orders, temperature
+0. The generator is `qwen3:1.7b` from Alibaba, so the two are from different
+model families, which is the point of running them as separate processes. The
+Gemini path is built and takes the same command with `--set
+judge.provider=gemini`; it was not measured, because there was no
+`GEMINI_API_KEY` on the machine that produced these numbers, and a
+framework that reports numbers it has not measured is the thing this project
+is against.
+
+### The validation set
+
+`data/hand_labels.json` holds **65 answers, labelled by hand**, in two parts.
+
+The first part is every distinct answer the framework produced across eleven
+configurations of the Phase 3 and Phase 4 runs — 48 of them. Each was graded by
+reading the question, the sources and the answer.
+
+The second part is 17 **negative controls**: the answer and the sources the
+framework produced for one question, paired with the question for an unrelated
+one. That is the shape of a retrieval error — a true statement about the wrong
+subject, offered as an answer — and it is the failure mode a judge is most
+likely to wave through.
+
+The set is 45 correct and 20 incorrect.
+
+The eleven runs are shipped in `reports/`, so every labelled answer can be
+traced back to the run that produced it:
+
+| Run | Retriever | `top_k` | Reasoning mode |
+| --- | --- | --- | --- |
+| `phase3_llm_lexical` | lexical | 3 | off |
+| `phase3_llm_lexical_think` | lexical | 3 | on |
+| `phase3_llm_hybrid` | hybrid | 3 | off |
+| `phase4_dense` | dense | 3 | off |
+| `phase4_hot` | lexical | 3 | off |
+| `phase4_hybrid_think` | hybrid | 3 | on |
+| `phase4_k1_lex` | lexical | 1 | off |
+| `phase4_k1_lex_think` | lexical | 1 | on |
+| `phase4_k1_hyb` | hybrid | 1 | off |
+| `phase4_k2_dense` | dense | 2 | off |
+| `phase4_judge_lexical` | lexical | 3 | off, **with the judge** |
+
+Eleven configurations rather than one, because a judge that only agrees with
+the labels on a single configuration's answers has been validated on a single
+configuration's mistakes.
+
+### The baseline is not a straw man
+
+The token rule is the rule the framework already uses, and it is right far more
+often than it is wrong. It is also wrong in exactly the cases that matter, and
+those are measured rather than asserted:
+
+| Case | Reference | The model's answer | `token_recall` | The token rule says |
+| --- | --- | --- | --- | --- |
+| 3 | *"The company uses Python as its primary programming language."* | *"Python"* | 0.167 | incorrect |
+| 4 | *"Bengaluru, Karnataka."* | *"Bengaluru"* | 0.500 | incorrect |
+| 20 | *"The standard work week runs Monday through Friday."* | *"The standard work week is Monday through Friday."* | 0.833 | incorrect |
+
+A label set with no reference answer has no token-rule verdict at all, so the
+four abstention items count against the token rule by construction. That is
+stated rather than hidden: the token rule cannot express "this is a correct
+refusal", and the judge can.
+
+### Cohen's κ, and why the held-out subset is the honest number
+
+κ corrects for chance agreement, which matters here because most answers in a
+validation set are correct and most raters say so. Two raters who agree on 90%
+of a set where 90% of the answers are correct would look excellent under raw
+agreement and would show a κ near zero.
+
+The rubric was written while looking at some of the items, because that is how
+a rubric gets written. A rubric fitted with a validation set open in front of
+you fits that set better than it generalises, so the items that were open are
+marked `used_for_tuning` in the label file and the agreement is reported twice:
+over everything, and over the **49 items that were held out**.
+
+### The numbers
+
+The judge was measured against the 65 hand labels, and against the token
+rule the framework was already using, on the same items:
+
+| Rater | All 65 items | | Held out (49) | |
+| --- | --- | --- | --- | --- |
+| | Agreement | κ | Agreement | κ |
+| **The judge** | **0.9692** | **0.9278** | **0.9796** | **0.9510** |
+| The token rule | 0.8615 | 0.7038 | 0.9592 | 0.9039 |
+| The two raters against each other | 0.8923 | 0.7696 | — | — |
+
+Both judges land in the "almost perfect" band on the held-out items
+(κ 0.95 and 0.90), and the token rule is the weaker of the two on the full
+set by a wide margin (κ 0.70 against 0.93).
+
+The confusion matrix on the full set says the same thing in a form that
+cannot be fudged:
+
+| | Human says incorrect | Human says correct |
+| --- | --- | --- |
+| Judge says incorrect | 19 | 1 |
+| Judge says correct | 1 | 44 |
+| Token rule says incorrect | 19 | 1 |
+| Token rule says correct | 8 | 37 |
+
+The token rule's error is almost entirely one-directional: it calls **eight
+of the correct answers incorrect** and gets one of the incorrect ones
+wrong. It is not a coin flip; it has a systematic bias against short answers
+and against refusals, which is exactly what a token overlap rule does. The
+judge's two errors are one in each direction.
+
+### Where the judge is right and the token rule is wrong
+
+Seven of the nine disagreements are the token rule failing and the judge
+holding the line. These are the items the Phase 3 work found by hand:
+
+| Case | The answer | `token_recall` | The token rule | The judge |
+| --- | --- | --- | --- | --- |
+| 3 | *Python* | 0.167 | incorrect | **correct** |
+| 4 | *Bengaluru* | 0.500 | incorrect | **correct** |
+| 8 | *Retrieval-Augmented Generation combines information retrieval with language generation.* | 0.600 | incorrect | **correct** |
+| 20 | *The standard work week is Monday through Friday.* | 0.833 | incorrect | **correct** |
+| 16, 17, 19 | *I don't know based on the available context.* | 0.000 | incorrect | **correct** |
+
+The last three are the correct refusals. The token rule cannot say "this is a
+correct refusal" — a refusal has no tokens in common with a reference that
+does not exist — so it calls every one of them wrong. The judge can, and
+does.
+
+### The two the judge gets wrong
+
+Two of the 65. Both are reported rather than rounded away.
+
+**Case 8 — the truncated answer.** The generator hit its token limit and
+emitted a fragment of JSON instead of an answer:
+
+```text
+{ "answer": "Retrieval-Augmented Generation is a method that combines information retrieval with language gene
+```
+
+The content inside is right and the judge says so (correctness 4, groundedness
+5). The hand label says incorrect, on the grounds that what reached the user
+is a malformed string rather than an answer. This is a judgement call about
+the *form* of the answer rather than its content, and it is the one place
+where the label and the rubric are asking different questions. The token
+rule happens to agree with the hand label here, for the wrong reason: it
+matches the reference tokens inside the fragment.
+
+**Case 18 — the correct refusal.** The question is *"What is the name of the
+chief executive officer?"*, nothing was retrieved, and the system correctly
+declined. The judge scores it 1/1/1/1 with the reason *"the sources do not
+say"* — which is the right answer to the question, attached to the wrong
+verdict. The two nearly identical items (a London office opening date, the
+capital of Mars) are graded correctly, so this is the judge being unstable
+on one item rather than a rule that is wrong.
+
+Three prompt variants were tried against this one item. Each one fixed it
+and broke a subject-mismatch negative control instead, and the variant that
+gets all five negative controls right was kept. Chasing one item at the cost
+of the failure mode that matters most is a bad trade, and the item is
+reported as a miss.
+
+### The judge's own consistency
+
+A judge that changes its mind between two calls is not a measurement. The
+run reports how much it agreed with itself:
+
+| Measure | Value | What it means |
+| --- | --- | --- |
+| Sample agreement | 0.9846 | The share of the 390 samples that agreed with the item's verdict |
+| Order consistency | 0.9692 | The share of items where both orders reached the same verdict |
+| Weighted κ on the 1–5 score | 0.9134 | Agreement on the graded score, not just the verdict |
+| Unreadable samples | 0 | Replies that could not be parsed as JSON |
+
+Two items came out in opposite directions depending on the order the
+reference and the answer were shown in, out of 65. That is the number that
+says whether the rubric is measuring the answer or the prompt layout.
+
+### The mean rubric scores
+
+| Dimension | Mean |
+| --- | --- |
+| Correctness | 3.80 |
+| Relevance | 3.86 |
+| Groundedness | 3.78 |
+| Completeness | 3.74 |
+
+The scores sit in the middle of the scale rather than at the top of it,
+which is what a set of 45 correct and 20 incorrect answers should look like.
+A judge that gave everything a 5 would be easy to spot here.
+
+### What the validation found in the framework
+
+The first run of this validation found a defect in the framework rather than
+in the judge, and it is worth writing down because it is the sort of thing
+that a report can hide.
+
+Two of the items were reported as `correctness: 3` **and** a verdict of
+"correct" at the same time. The scores were aggregated with the median of
+the samples and the verdict with a majority vote, and for a six-sample split
+of three and three those two rules disagree: the average of the two middle
+samples was 4, while the vote was 3–3 and the tie was broken towards
+"correct".
+
+The fix is one rule instead of two. The score is the **lower** median — the
+smaller of the two middle samples, not their average, because an average
+reports a score that no sample produced — and the verdict is a **strict**
+majority, with a tie going against "correct". The lower median and a strict
+majority are the same rule applied to the same numbers, so the score and the
+verdict can never contradict each other. A reader who sees `correctness: 3`
+and knows the threshold was 4 can work out the verdict without guessing.
+
+The item was already in the hand-labelled set, so the framework failed the
+test it was given. That is the point of running one.
+
+### Reading the numbers
+
+```bash
+PYTHONPATH=src python -m rageval.cli validate-judge \
+  --labels data/hand_labels.json \
+  --set judge.provider=ollama \
+  --set judge.model=llama3.2:3b \
+  --set judge.think=false
+```
+
+The report is written to `reports/judge_validation.json` and contains every
+item, every score and every disagreement, so any number in this README can be
+traced back to the items that produced it.
+
+---
 
 Configuration is a plain dataclass tree. It can be written as JSON, loaded from
 a file, and overridden from the command line with dotted paths.
@@ -472,10 +885,16 @@ PYTHONPATH=src python -m rageval.cli run \
     "enabled": false,
     "provider": "gemini",
     "model": "gemini-3.8-flash",
+    "base_url": "",
     "api_key_env": "GEMINI_API_KEY",
     "n_samples": 3,
     "swap_order": true,
-    "temperature": 0.0
+    "temperature": 0.0,
+    "max_tokens": 512,
+    "threshold": 4,
+    "seed": 42,
+    "think": null,
+    "timeout_seconds": 120.0
   }
 }
 ```
@@ -508,6 +927,12 @@ overrides. A typo in a config file should fail loudly.
 - **`retrieval.lexical_weight` / `retrieval.dense_weight`** are the blend used
   by the hybrid retriever. They are normalised, so `0.7`/`0.3` and `7`/`3` mean
   the same thing.
+- **`judge.threshold`** is the correctness score at which the judge calls an
+  answer correct. It is the only place the binary verdict is decided, so
+  changing it moves every `judge_correct` number in the framework at once.
+- **`judge.n_samples` and `judge.swap_order`** control how hard the judge is
+  checked, and therefore how much it costs. `n_samples=3` with the swap on is
+  six calls per answer.
 
 The two floors are separated on purpose. Trying to make one threshold do both
 jobs produces a number that is hard to reason about and hard to tune.
@@ -653,6 +1078,48 @@ barely matters.** Phase 3 confirmed the prediction: with the language model
 generator, the same switch from lexical to hybrid changes three answers and
 moves `token_f1` from 0.7973 to 0.8136.
 
+### The judge
+
+The same 21 cases, the lexical retriever, `qwen3:1.7b` as the generator and
+`llama3.2:3b` as the judge, with the judge graded on the full protocol (three
+samples, both orders):
+
+| Metric | The token rule | The judge |
+| --- | --- | --- |
+| `answer_correct` / `judge_correct` | 0.8824 | **0.9524** |
+| `judge_token_agreement` | — | 0.8824 |
+| `judge_correctness` | — | 4.8095 |
+| `judge_relevance` | — | 4.8095 |
+| `judge_groundedness` | — | 4.8095 |
+| `judge_completeness` | — | 4.8095 |
+| `error_count` | 0 | 0 |
+
+The judge and the token rule agree on 15 of the 17 graded cases — the four
+abstentions have no token-rule verdict to compare against. The two they
+disagree on are cases 3 and 4, the two the token rule is known to get wrong:
+*"Python"* for *"Which programming language does the company use?"* and
+*"Bengaluru"* for *"Which city is the office in?"*.
+
+That is the whole argument for the phase in one line: **on the same answers,
+the judge scores 0.9524 where the token rule scores 0.8824, and the
+difference is entirely the token rule's mistakes.**
+
+Reproduce it with:
+
+```bash
+PYTHONPATH=src python -m rageval.cli run \
+  --set generation.provider=ollama \
+  --set generation.model=qwen3:1.7b \
+  --set judge.enabled=true \
+  --set judge.provider=ollama \
+  --set judge.model=llama3.2:3b \
+  --set judge.think=false \
+  --run-name phase4_judge_lexical
+```
+
+The saved run is `reports/phase4_judge_lexical.json`, and the per-case judge
+scores are columns 22–27 of the CSV next to it.
+
 ---
 
 ## Known limitations
@@ -714,7 +1181,7 @@ right way to do that is to sweep the floor and watch `hit_at_k`,
 framework will not stop a badly chosen floor from losing answers — it will
 just make the loss visible.
 
-**5. The answer correctness rule is a proxy — and now it is measurably wrong.**
+**5. The answer correctness rule is a proxy — and it is measurably wrong.**
 `token_recall >= 0.9` is a reasonable stand-in for "says the same thing", but
 it is not understanding. Phase 3 turned this from a worry into a measurement:
 on the language model's answers the rule marks *"Bengaluru"* wrong for
@@ -723,13 +1190,37 @@ week is Monday through Friday."* wrong for a reference that reads *"The standard
 work week runs Monday through Friday."* (token recall 0.833). Two of the
 model's three "errors" are correct answers.
 
-This is the strongest argument yet for the judge phase, and it comes with a
-caveat: a judge is not automatically better. It has to be validated against
-hand labels with Cohen's κ before any of its numbers are trusted, and until
-that is done the token rule stays the headline and the judge is reported
-alongside it.
+Phase 4 measured the judge against the same items and the same hand labels,
+and the judge gets those right. The token rule does not come out of the
+comparison and stop being the headline: the token rule stays in the report
+next to the judge, because on the abstention items it has no verdict at all,
+and a rule that cannot say "this is a correct refusal" is not a rule about
+correctness.
 
-**6. The seed does not make the model bit-reproducible.** Over 19 independent
+**6. The judge cannot see a retrieval failure.**
+The judge is deliberately **context-bound**: it grades the answer against the
+sources it was given, because that is the only thing a judge can fairly be
+asked to do. A pipeline that retrieved the wrong chunks and answered them
+confidently produces an answer that is perfectly grounded in the wrong
+context, and the judge will say the answer is grounded. The judge grades the
+answer, not the retrieval; the retrieval metrics still have to do that job, and
+the two are reported side by side rather than merged.
+
+**7. The rubric was written with the validation set open.**
+The 49 held-out items are the honest measurement, and they are reported
+separately for that reason. The κ over all 65 items is optimistic, and anyone
+reading it should read the held-out figure instead.
+
+**8. The local judge is a 3B model.**
+`llama3.2:3b` is small enough to run on a laptop, which is the point of the
+local fallback. It reaches κ 0.93 against the hand labels and gets two of the
+65 items wrong, but it is not a strong grader: one of those two is a
+judgement call about the *form* of an answer rather than its content, and
+the other is an outright inconsistency on a single item. Its self-consistency
+numbers say the same thing — 1.5% of its samples disagree with their own
+verdict. The hosted judge exists for exactly this reason.
+
+**9. The seed does not make the model bit-reproducible.** Over 19 independent
 runs, 17 produced identical answers and 2 differed on a single case. The seed
 fixes the sampling, not the GPU arithmetic. The response cache is what makes a
 run exactly reproducible.
@@ -749,15 +1240,19 @@ history, and they are a fair illustration of what a test set goes through.
 | **1** ✅ | Real metrics, threshold calibration, reproducible baseline report |
 | **2** ✅ | Dense retrieval (Ollama embeddings) and a hybrid retriever, with the same `Retriever` interface |
 | **3** ✅ | LLM answer generation via Ollama, seeded for reproducibility, with the extractive baseline kept as a comparison arm |
-| **4** | LLM-as-judge on a different model family, validated against hand labels with Cohen's κ before it is trusted |
+| **4** ✅ | LLM-as-judge on a different model family, validated against hand labels with Cohen's κ before it is trusted |
 | **5** | Streamlit dashboard, then a public deployment |
 
 The dashboard comes last on purpose. A UI over broken metrics is a UI over
 broken metrics.
 
-Phase 4 has its work cut out for it. The token rule now demonstrably marks
-correct answers wrong, so the judge's first job is to be *right* about those
-cases, and its second is to say so out loud if it is not.
+Phase 4 delivered what it was asked for, with the caveat it was supposed to
+have: the judge is measured against the hand labels rather than assumed to be
+better than the token rule, and where it is not better, the report says so.
+On the 65 hand-labelled answers the judge reaches κ 0.93 against the token
+rule's 0.70, and it gets two of the 65 wrong. The validation also turned up
+a defect in the framework's own aggregation, which is written up under
+*What the validation found in the framework*.
 
 ---
 
@@ -782,18 +1277,20 @@ left to rot, and this README replaced the one that described them.
 make test          # or: python -m pytest
 ```
 
-226 tests across thirteen modules. They cover the tokenizer and stemmer, chunking
+293 tests across fourteen modules. They cover the tokenizer and stemmer, chunking
 and BM25 ranking, every metric, dataset validation and the legacy format,
 configuration overrides and the no-secrets rule, generator abstention, the
 response cache, the embedding client, the dense and hybrid retrievers, the
 language model generator (request shape, JSON parsing, abstention, timeouts and
-HTTP failures), the retriever and generator comparisons, and the runner end to
-end including the report files it writes.
+HTTP failures), the judge (the rubric, the reply parsing, the aggregation, the
+order swap, both transports, Cohen's κ, the label file and the validation
+report), the retriever and generator comparisons, and the runner end to end
+including the report files it writes.
 
-**The suite needs no model server.** The HTTP layers of both the embedding
-client and the language model generator are replaced, and the dense and hybrid
-retrievers are driven by a fake embedder, so `make test` passes on a machine
-where Ollama is not installed at all.
+**The suite needs no model server.** The HTTP layers of the embedding client,
+the language model generator and both judges are replaced, and the dense and
+hybrid retrievers are driven by a fake embedder, so `make test` passes on a
+machine where Ollama is not installed at all.
 
 The suite runs with no install step: `pyproject.toml` sets
 `pythonpath = ["src"]` for pytest.
@@ -824,12 +1321,23 @@ Ollama server:
 ollama serve
 ollama pull embeddinggemma     # for the dense and hybrid retrievers
 ollama pull qwen3:1.7b         # for the language model generator
+ollama pull llama3.2:3b        # for the local judge
 ```
 
 The error message says which of the two is wrong. If the server is up but the
 model is missing, the response is a 404 and the message names the model to
 pull. The lexical retriever and the extractive generator need neither, and the
 whole test suite runs without a server at all.
+
+**The judge needs a key it does not have**
+The default judge provider is `gemini`, and it reads the key from
+`$GEMINI_API_KEY`. Without one, the framework says so and points at the local
+judge rather than failing obscurely:
+
+```bash
+PYTHONPATH=src python -m rageval.cli run --set judge.enabled=true \
+  --set judge.provider=ollama --set judge.model=llama3.2:3b --set judge.think=false
+```
 
 **The language model answers but it is slow**
 

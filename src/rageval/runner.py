@@ -15,6 +15,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter
+from typing import Any
 
 from rageval.cache import DiskCache, framework_fingerprint
 from rageval.config import DEFAULT_OLLAMA_BASE_URL, EvalConfig
@@ -23,6 +24,11 @@ from rageval.generation.base import GenerationResult, Generator
 from rageval.generation.cached import CachedGenerator
 from rageval.generation.extractive import ExtractiveGenerator
 from rageval.generation.ollama import OllamaGenerator
+from rageval.judge.base import JudgeItem
+from rageval.judge.cached import CachedChatClient
+from rageval.judge.judge import RubricJudge
+from rageval.judge.ollama import OllamaJudge
+from rageval.judge.openai_compat import OpenAICompatJudge
 from rageval.metrics.answer import (
     evaluate_answer_relevance,
     evaluate_faithfulness,
@@ -164,6 +170,70 @@ def build_generator(config: EvalConfig) -> Generator:
     return generator
 
 
+def build_judge(config: EvalConfig) -> RubricJudge:
+    """Create the judge described by the configuration.
+
+    The judge is built the same way the generator is, so the two share the
+    cache, the timeout handling and the error reporting. The API key is
+    read from the environment and is never written to a configuration
+    file, so a run can be reproduced from its report without leaking a
+    secret.
+    """
+    settings = config.judge
+
+    api_key = None
+    if settings.api_key_env:
+        api_key = os.environ.get(settings.api_key_env)
+
+    if settings.provider == "ollama":
+        client: Any = OllamaJudge(
+            settings.model,
+            base_url=settings.resolved_base_url,
+            api_key=api_key,
+            temperature=settings.temperature,
+            seed=settings.seed,
+            max_tokens=settings.max_tokens,
+            timeout=settings.timeout_seconds,
+            think=settings.think,
+        )
+    elif settings.provider in ("gemini", "openai", "openai_compat"):
+        if not api_key:
+            raise ValueError(
+                f"The judge needs an API key. Set the {settings.api_key_env} "
+                "environment variable, or use the local judge instead with "
+                "--set judge.provider=ollama."
+            )
+        client = OpenAICompatJudge(
+            settings.model,
+            base_url=settings.resolved_base_url,
+            api_key=api_key,
+            temperature=settings.temperature,
+            max_tokens=settings.max_tokens,
+            seed=settings.seed,
+            timeout=settings.timeout_seconds,
+        )
+    else:
+        raise ValueError(
+            f"Unknown judge provider '{settings.provider}'. "
+            "Available: gemini, ollama."
+        )
+
+    if config.use_cache:
+        cache = DiskCache(Path(config.cache_dir), enabled=True)
+        client = CachedChatClient(
+            client,
+            cache,
+            namespace=f"judge:{framework_fingerprint()}",
+        )
+
+    return RubricJudge(
+        client,
+        n_samples=settings.n_samples,
+        swap_order=settings.swap_order,
+        threshold=settings.threshold,
+    )
+
+
 def compute_metrics(
     case: TestCase,
     chunks: list[RetrievedChunk],
@@ -231,11 +301,44 @@ def compute_metrics(
     return metrics
 
 
+def judge_answer(
+    case: TestCase,
+    generated: GenerationResult,
+    context: str,
+    judge: RubricJudge,
+) -> tuple[dict[str, float], dict[str, Any]]:
+    """Grade one generated answer against the rubric.
+
+    The judge is asked about the answer that was actually produced,
+    including a refusal, because refusing to answer is one of the ways an
+    answer can be right.
+    """
+    judgement = judge.judge(
+        JudgeItem(
+            question=case.question,
+            answer=generated.text,
+            context=context,
+            reference_answer=case.reference_answer,
+            test_id=case.id,
+        )
+    )
+
+    metrics = {
+        "judge_correct": 1.0 if judgement.correct else 0.0,
+        "judge_correctness": float(judgement.correctness),
+        "judge_relevance": float(judgement.relevance),
+        "judge_groundedness": float(judgement.groundedness),
+        "judge_completeness": float(judgement.completeness),
+    }
+    return metrics, judgement.to_dict()
+
+
 def evaluate_case(
     case: TestCase,
     retriever: Retriever,
     generator: Generator,
     config: EvalConfig,
+    judge: RubricJudge | None = None,
 ) -> CaseResult:
     """Run one case through the pipeline and score the outcome."""
     started = perf_counter()
@@ -250,6 +353,29 @@ def evaluate_case(
         generated = generator.generate(case.question, context)
         latency_ms = int((perf_counter() - started) * 1000)
 
+        metrics = compute_metrics(case, chunks, generated, context, config)
+        verdict: dict[str, Any] = {}
+
+        if judge is not None:
+            try:
+                judge_metrics, verdict = judge_answer(case, generated, context, judge)
+            except Exception as error:  # noqa: BLE001 - a bad verdict, not a lost case
+                # A judge that cannot be reached costs this case its verdict,
+                # not the case itself. The retrieval and the generation still
+                # happened, and what they produced is still worth reporting.
+                verdict = {"error": f"{type(error).__name__}: {error}"}
+            else:
+                metrics.update(judge_metrics)
+                # How often the judge and the token rule reach the same
+                # conclusion. A run where they never agree is a run where one
+                # of them is measuring something other than correctness.
+                if "answer_correct" in metrics:
+                    metrics["judge_token_agreement"] = (
+                        1.0
+                        if metrics["judge_correct"] == metrics["answer_correct"]
+                        else 0.0
+                    )
+
         return CaseResult(
             test_id=case.id,
             question=case.question,
@@ -259,10 +385,11 @@ def evaluate_case(
             answer=generated.text,
             abstained=generated.abstained,
             abstention_reason=generated.reason,
-            metrics=compute_metrics(case, chunks, generated, context, config),
+            metrics=metrics,
             latency_ms=latency_ms,
             generator=generated.model,
             cached=generated.cached,
+            judge=verdict,
         )
     except Exception as error:  # noqa: BLE001 - one bad case must not kill a run
         latency_ms = int((perf_counter() - started) * 1000)
@@ -356,22 +483,18 @@ def current_git_commit() -> str | None:
 
 def run_evaluation(config: EvalConfig) -> RunResult:
     """Evaluate the whole dataset and write the report."""
-    if config.judge.enabled:
-        raise NotImplementedError(
-            "The LLM-as-judge is not implemented yet. Set judge.enabled to false "
-            "or wait for the judge phase."
-        )
-
     dataset = load_dataset(Path(config.dataset_path))
     document = load_knowledge_base(Path(config.knowledge_base_path))
     retriever = build_retriever(config, document)
     generator = build_generator(config)
+    judge = build_judge(config) if config.judge.enabled else None
 
     created_at = datetime.now(timezone.utc)
     run_id = config.run_name or f"run_{created_at.strftime('%Y%m%d_%H%M%S')}"
 
     cases = [
-        evaluate_case(case, retriever, generator, config) for case in dataset.cases
+        evaluate_case(case, retriever, generator, config, judge)
+        for case in dataset.cases
     ]
 
     run = RunResult(

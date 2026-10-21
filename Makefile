@@ -12,7 +12,12 @@ SRC := src
 PYTHONPATH := $(SRC)
 export PYTHONPATH
 
-.PHONY: help install run test cases config retrieve compare compare-generators lint clean
+# The judge used by the validate-judge target. The local one needs no key.
+JUDGE_PROVIDER ?= ollama
+JUDGE_MODEL ?= llama3.2:3b
+
+.PHONY: help install run test cases config retrieve compare compare-generators \
+	validate-judge lint clean
 
 help:
 	@echo "Targets:"
@@ -24,6 +29,7 @@ help:
 	@echo "  retrieve  show what the retriever returns for a question"
 	@echo "  compare   compare the lexical, dense and hybrid retrievers"
 	@echo "  compare-generators  compare the extractive baseline against a model"
+	@echo "  validate-judge  grade the hand labels and measure the judge"
 	@echo "  lint      run ruff and mypy"
 	@echo "  clean     remove caches and generated reports"
 
@@ -57,6 +63,13 @@ compare:
 
 compare-generators:
 	$(PYTHON) -m rageval.compare --axis generator --model $(MODEL)
+
+validate-judge:
+	$(PYTHON) -m rageval.cli validate-judge \
+		--labels data/hand_labels.json \
+		--set judge.provider=$(JUDGE_PROVIDER) \
+		--set judge.model=$(JUDGE_MODEL) \
+		--set judge.think=false
 
 lint:
 	$(PYTHON) -m ruff check src tests

@@ -78,6 +78,9 @@ DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
 #: Ollama's OpenAI compatible prefix, used for embeddings.
 DEFAULT_OLLAMA_OPENAI_URL = "http://localhost:11434/v1"
 
+#: Google's OpenAI compatible prefix for the Gemini API.
+DEFAULT_GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
+
 
 @dataclass
 class RetrievalConfig:
@@ -168,21 +171,53 @@ class JudgeConfig:
     """LLM-as-judge settings.
 
     The judge must be a different model family from the generator, otherwise
-    it tends to score its own phrasing higher than it deserves.
+    it tends to score its own phrasing higher than it deserves. The
+    framework cannot enforce that from the outside, so it is worth checking
+    by hand when the judge is set up.
+
+    ``threshold`` is the correctness score at which a verdict counts as
+    correct. The judge is asked for the four rubric scores only, and the
+    binary verdict is derived from that one score, so that the framework
+    never has two fields that can contradict each other.
+
+    ``n_samples`` and ``swap_order`` exist to make the judge's own
+    behaviour visible. A judge that changes its mind about the same answer
+    between two calls, or when the reference and the graded answer swap
+    places, is measuring something other than the answer.
     """
 
     enabled: bool = False
     provider: str = "gemini"
     model: str = "gemini-3.8-flash"
-    base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    base_url: str = ""
     api_key_env: str = "GEMINI_API_KEY"
     n_samples: int = 3
     swap_order: bool = True
     temperature: float = 0.0
     max_tokens: int = 512
+    threshold: int = 4
+    seed: int = 42
+    think: bool | None = None
+    timeout_seconds: float = 120.0
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        data["base_url"] = self.resolved_base_url
+        return data
+
+    @property
+    def resolved_base_url(self) -> str:
+        """The endpoint the judge will actually be called on.
+
+        The default depends on the provider, so a judge pointed at Gemini
+        and a judge pointed at a local Ollama server do not need a base URL
+        written down to be distinguishable.
+        """
+        if self.base_url:
+            return self.base_url
+        if self.provider == "ollama":
+            return DEFAULT_OLLAMA_BASE_URL
+        return DEFAULT_GEMINI_BASE_URL
 
 
 @dataclass

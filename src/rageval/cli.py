@@ -55,6 +55,7 @@ def _format_cases(run: RunResult) -> list[dict[str, Any]]:
                 "id": case.test_id,
                 "answerable": "yes" if case.answerable else "no",
                 "correct": case.metrics.get("answer_correct", ""),
+                "judged": case.metrics.get("judge_correct", ""),
                 "hit@k": case.metrics.get("hit_at_k", ""),
                 "mrr": case.metrics.get("reciprocal_rank", ""),
                 "abstained": "yes" if case.abstained else "no",
@@ -90,6 +91,8 @@ def command_run(args: argparse.Namespace) -> int:
     print(f"Commit:       {run.git_commit or 'unknown'}")
     print(f"Generator:    {config.generation.provider} ({config.generation.model})")
     print(f"Retriever:    {config.retrieval.retriever} (top_k={config.retrieval.top_k})")
+    if config.judge.enabled:
+        print(f"Judge:        {config.judge.provider} ({config.judge.model})")
     print()
 
     print("AGGREGATES")
@@ -99,7 +102,16 @@ def command_run(args: argparse.Namespace) -> int:
     print("CASES")
     _print_table(
         _format_cases(run),
-        ["id", "answerable", "correct", "hit@k", "mrr", "abstained", "question"],
+        [
+            "id",
+            "answerable",
+            "correct",
+            "judged",
+            "hit@k",
+            "mrr",
+            "abstained",
+            "question",
+        ],
     )
     print()
 
@@ -189,6 +201,147 @@ def command_retrieve(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_validate_judge(args: argparse.Namespace) -> int:
+    """Grade a hand labelled set and report how well the judge agrees."""
+    from rageval.judge.labels import load_labels
+    from rageval.judge.validation import validate
+    from rageval.runner import build_judge
+
+    config = _build_config(args)
+    labels_path = Path(args.labels)
+    items = load_labels(labels_path)
+
+    judge = build_judge(config)
+
+    print(
+        f"Judge:        {config.judge.provider} ({config.judge.model}) "
+        f"x{config.judge.n_samples} samples, "
+        f"{'both orders' if config.judge.swap_order else 'one order'}"
+    )
+    print(f"Labels:       {labels_path} ({len(items)} items)")
+    print()
+
+    def progress(done: int, total: int) -> None:
+        if not args.json:
+            print(f"\rGrading {done}/{total} items...", end="", flush=True)
+
+    report = validate(judge, items, progress=progress)
+    if not args.json:
+        print("\r" + " " * 40 + "\r", end="")
+
+    if args.json:
+        print(json.dumps(report, indent=2, default=str))
+        return 0
+
+    subsets = [
+        ("all items", report["all"]),
+        ("held out", report["held_out"]),
+    ]
+
+    for title, subset in subsets:
+        if not subset:
+            continue
+        print(f"AGREEMENT WITH THE HAND LABELS ({title}, {subset['n_items']} items)")
+        _print_table(
+            [
+                {
+                    "rater": "judge",
+                    "agreement": f"{subset['judge']['observed_agreement']:.4f}",
+                    "kappa": f"{subset['judge']['cohen_kappa']:.4f}",
+                    "band": subset["judge"]["interpretation"],
+                },
+                {
+                    "rater": "token rule",
+                    "agreement": f"{subset['token_rule']['observed_agreement']:.4f}",
+                    "kappa": f"{subset['token_rule']['cohen_kappa']:.4f}",
+                    "band": subset["token_rule"]["interpretation"],
+                },
+            ],
+            ["rater", "agreement", "kappa", "band"],
+        )
+        print()
+
+    print("JUDGE SELF CONSISTENCY")
+    _print_table(
+        [
+            {
+                "measure": "sample agreement",
+                "value": f"{report['judge']['sample_agreement']:.4f}",
+            },
+            {
+                "measure": "order consistency",
+                "value": (
+                    f"{report['judge']['order_consistency']:.4f}"
+                    if report["judge"]["order_consistency"] is not None
+                    else "not tested"
+                ),
+            },
+            {
+                "measure": "weighted kappa on the 1-5 score",
+                "value": f"{report['all']['score_kappa']:.4f}",
+            },
+            {
+                "measure": "unreadable samples",
+                "value": str(report["n_failed"]),
+            },
+        ],
+        ["measure", "value"],
+    )
+    print()
+
+    print("MEAN RUBRIC SCORES")
+    _print_table(
+        [
+            {"dimension": dimension, "mean": f"{value:.4f}"}
+            for dimension, value in report["judge"]["mean_scores"].items()
+        ],
+        ["dimension", "mean"],
+    )
+    print()
+
+    disagreements = report["disagreements"]
+    print(f"WHERE A RATER DISAGREES WITH THE LABELS ({len(disagreements)} item(s))")
+    _print_table(
+        [
+            {
+                "case": row["test_id"],
+                "answer": row["answer"][:40],
+                "human": row["human_label"],
+                "judge": row["judge_label"],
+                "token rule": row["token_rule_label"],
+                "tuned": "yes" if row.get("used_for_tuning") else "",
+            }
+            for row in disagreements
+        ],
+        ["case", "answer", "human", "judge", "token rule", "tuned"],
+    )
+    print()
+
+    reports_dir = Path(config.reports_dir)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    report_path = reports_dir / "judge_validation.json"
+    report_path.write_text(
+        json.dumps(report, indent=2, default=str), encoding="utf-8"
+    )
+    print(f"Report written to {report_path.resolve()}")
+
+    kappa_judge = report["all"]["judge"]["cohen_kappa"]
+    kappa_token = report["all"]["token_rule"]["cohen_kappa"]
+    kappa_held = report["held_out"]["judge"]["cohen_kappa"]
+    if kappa_judge > kappa_token:
+        print(
+            f"The judge agrees with the labels better than the token rule "
+            f"(kappa {kappa_judge:.4f} against {kappa_token:.4f})."
+        )
+    else:
+        print(
+            f"The judge does not beat the token rule "
+            f"(kappa {kappa_judge:.4f} against {kappa_token:.4f})."
+        )
+    print(f"On the held-out items the judge's kappa is {kappa_held:.4f}.")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="rag-eval",
@@ -233,6 +386,25 @@ def build_parser() -> argparse.ArgumentParser:
     add_common(retrieve_parser)
     retrieve_parser.add_argument("question", help="The question to retrieve for.")
     retrieve_parser.set_defaults(func=command_retrieve)
+
+    validate_parser = sub.add_parser(
+        "validate-judge",
+        help="Measure a judge against a hand labelled set.",
+    )
+    add_common(validate_parser)
+    validate_parser.add_argument(
+        "--labels",
+        type=Path,
+        default=Path("data/hand_labels.json"),
+        help="Path to the hand labelled set.",
+    )
+    validate_parser.add_argument(
+        "--no-cache", action="store_true", help="Disable the cache."
+    )
+    validate_parser.add_argument(
+        "--json", action="store_true", help="Print the raw report."
+    )
+    validate_parser.set_defaults(func=command_validate_judge)
 
     return parser
 

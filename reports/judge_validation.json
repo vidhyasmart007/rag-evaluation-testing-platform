@@ -1,0 +1,1610 @@
+{
+  "n_items": 65,
+  "n_failed": 0,
+  "judge": {
+    "name": "ollama:llama3.2:3b",
+    "n_samples": 3,
+    "swap_order": true,
+    "threshold": 4,
+    "mean_scores": {
+      "correctness": 3.8,
+      "relevance": 3.8615,
+      "groundedness": 3.7846,
+      "completeness": 3.7385
+    },
+    "sample_agreement": 0.9846,
+    "order_consistency": 0.9692
+  },
+  "token_rule": {
+    "recall_threshold": 0.9
+  },
+  "all": {
+    "n_items": 65,
+    "n_correct": 45,
+    "judge": {
+      "n": 65,
+      "observed_agreement": 0.9692,
+      "cohen_kappa": 0.9278,
+      "interpretation": "almost perfect",
+      "categories": [
+        "incorrect",
+        "correct"
+      ],
+      "confusion": {
+        "incorrect": {
+          "incorrect": 19,
+          "correct": 1
+        },
+        "correct": {
+          "incorrect": 1,
+          "correct": 44
+        }
+      }
+    },
+    "token_rule": {
+      "n": 65,
+      "observed_agreement": 0.8615,
+      "cohen_kappa": 0.7038,
+      "interpretation": "substantial",
+      "categories": [
+        "incorrect",
+        "correct"
+      ],
+      "confusion": {
+        "incorrect": {
+          "incorrect": 19,
+          "correct": 1
+        },
+        "correct": {
+          "incorrect": 8,
+          "correct": 37
+        }
+      }
+    },
+    "judge_vs_token_rule": {
+      "n": 65,
+      "observed_agreement": 0.8923,
+      "cohen_kappa": 0.7696,
+      "interpretation": "substantial",
+      "categories": [
+        "incorrect",
+        "correct"
+      ],
+      "confusion": {
+        "incorrect": {
+          "incorrect": 20,
+          "correct": 0
+        },
+        "correct": {
+          "incorrect": 7,
+          "correct": 38
+        }
+      }
+    },
+    "score_kappa": 0.9134
+  },
+  "held_out": {
+    "n_items": 49,
+    "n_correct": 34,
+    "judge": {
+      "n": 49,
+      "observed_agreement": 0.9796,
+      "cohen_kappa": 0.951,
+      "interpretation": "almost perfect",
+      "categories": [
+        "incorrect",
+        "correct"
+      ],
+      "confusion": {
+        "incorrect": {
+          "incorrect": 14,
+          "correct": 1
+        },
+        "correct": {
+          "incorrect": 0,
+          "correct": 34
+        }
+      }
+    },
+    "token_rule": {
+      "n": 49,
+      "observed_agreement": 0.9592,
+      "cohen_kappa": 0.9039,
+      "interpretation": "almost perfect",
+      "categories": [
+        "incorrect",
+        "correct"
+      ],
+      "confusion": {
+        "incorrect": {
+          "incorrect": 14,
+          "correct": 1
+        },
+        "correct": {
+          "incorrect": 1,
+          "correct": 33
+        }
+      }
+    },
+    "judge_vs_token_rule": {
+      "n": 49,
+      "observed_agreement": 0.9796,
+      "cohen_kappa": 0.951,
+      "interpretation": "almost perfect",
+      "categories": [
+        "incorrect",
+        "correct"
+      ],
+      "confusion": {
+        "incorrect": {
+          "incorrect": 14,
+          "correct": 0
+        },
+        "correct": {
+          "incorrect": 1,
+          "correct": 34
+        }
+      }
+    },
+    "score_kappa": 0.9407
+  },
+  "disagreements": [
+    {
+      "test_id": 3,
+      "answer": "Python",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "token_recall": 0.1667,
+      "used_for_tuning": true,
+      "note": "Names the language, which is all the question asked. The token rule scores 0.167 token recall and calls it wrong."
+    },
+    {
+      "test_id": 4,
+      "answer": "Bengaluru",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "token_recall": 0.5,
+      "used_for_tuning": true,
+      "note": "Names the city, which is all the question asked. The token rule scores 0.500 token recall and calls it wrong."
+    },
+    {
+      "test_id": 8,
+      "answer": "Retrieval-Augmented Generation combines information retrieval with language generation.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "token_recall": 0.6,
+      "used_for_tuning": true,
+      "note": "The first half of the definition. True, and it answers the question, but it stops short of the reference, so completeness should score below correctness."
+    },
+    {
+      "test_id": 8,
+      "answer": "{ \"answer\": \"Retrieval-Augmented Generation is a method that combines information retrieval with language generation, using relevant document sections as context to answer questions, ensuring the generated answers are supported by the provided information.\", \"ab",
+      "human_label": "incorrect",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The generator ran into its token limit and emitted a truncated JSON fragment instead of an answer. The content inside is right, but what reached the user is malformed."
+    },
+    {
+      "test_id": 16,
+      "answer": "I don't know based on the available context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "The knowledge base says nothing about a London office. Declining is right."
+    },
+    {
+      "test_id": 17,
+      "answer": "I don't know based on the available context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "The knowledge base says nothing about sick leave. Declining is right."
+    },
+    {
+      "test_id": 18,
+      "answer": "I don't know based on the available context.",
+      "human_label": "correct",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "The knowledge base names no chief executive. Declining is right."
+    },
+    {
+      "test_id": 19,
+      "answer": "I don't know based on the available context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "Not answerable from the knowledge base. Declining is right."
+    },
+    {
+      "test_id": 20,
+      "answer": "The standard work week is Monday through Friday.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "token_recall": 0.8333,
+      "used_for_tuning": true,
+      "note": "Says the same as the reference. The token rule scores 0.833 token recall and calls it wrong."
+    }
+  ],
+  "items": [
+    {
+      "test_id": 1,
+      "question": "Where is the company office?",
+      "answer": "Company Knowledge Base The company office is located in Bengaluru, Karnataka.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer exactly",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The chunker prepends the document heading. The answer itself is right.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 1,
+      "question": "Where is the company office?",
+      "answer": "The company office is located in Bengaluru, Karnataka.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": true,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 2,
+      "question": "How many annual leave days do employees receive?",
+      "answer": "Employees receive 18 annual leave days per calendar year.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 3,
+      "question": "Which programming language does the company use?",
+      "answer": "Python",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.1667,
+      "used_for_tuning": true,
+      "note": "Names the language, which is all the question asked. The token rule scores 0.167 token recall and calls it wrong.",
+      "source": "phase3_llm_lexical_think"
+    },
+    {
+      "test_id": 3,
+      "question": "Which programming language does the company use?",
+      "answer": "The company uses Python as its primary programming language for several internal automation and AI projects.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 4
+      },
+      "judge_reason": "the ANSWER is correct but does not directly answer the question",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The source sentence, with the clause the source also states.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 3,
+      "question": "Which programming language does the company use?",
+      "answer": "The company uses Python as its primary programming language.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": true,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 4,
+      "question": "Which city is the office in?",
+      "answer": "Bengaluru",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "directly answers the question",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.5,
+      "used_for_tuning": true,
+      "note": "Names the city, which is all the question asked. The token rule scores 0.500 token recall and calls it wrong.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 4,
+      "question": "Which city is the office in?",
+      "answer": "Bengaluru, Karnataka",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer exactly",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Names the city and the state.",
+      "source": "phase4_hybrid_think"
+    },
+    {
+      "test_id": 4,
+      "question": "Which city is the office in?",
+      "answer": "Company Knowledge Base The company office is located in Bengaluru, Karnataka.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Answers the city question by naming Bengaluru. The heading is prepended by the chunker.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 5,
+      "question": "How many leave days are provided?",
+      "answer": "18",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.5,
+      "used_for_tuning": false,
+      "note": "The number answers the question.",
+      "source": "phase3_llm_hybrid"
+    },
+    {
+      "test_id": 5,
+      "question": "How many leave days are provided?",
+      "answer": "18 annual leave days",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Answers the question.",
+      "source": "phase4_hot"
+    },
+    {
+      "test_id": 5,
+      "question": "How many leave days are provided?",
+      "answer": "18 annual leave days per calendar year",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 5,
+      "question": "How many leave days are provided?",
+      "answer": "Employees receive 18 annual leave days per calendar year.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 4,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "partly right, includes additional information not asked for",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 6,
+      "question": "Which programming language is used for the automation projects?",
+      "answer": "Python",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Names the language.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 6,
+      "question": "Which programming language is used for the automation projects?",
+      "answer": "The company uses Python as its primary programming language for several internal automation and AI projects.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Names Python and says it is used for the automation and AI projects.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 7,
+      "question": "What does the AI team work on?",
+      "answer": "The AI team works on machine learning, large language models, AI evaluation, and automation solutions.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 8,
+      "question": "What is Retrieval-Augmented Generation?",
+      "answer": "Retrieval-Augmented Generation combines information retrieval with language generation, retrieving relevant document sections and using them as context for answering questions. It ensures that the generated answers are supported by the provided context, measuring faithfulness and context relevance.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The definition, plus a true closing clause about faithfulness and context relevance.",
+      "source": "phase4_k1_lex_think"
+    },
+    {
+      "test_id": 8,
+      "question": "What is Retrieval-Augmented Generation?",
+      "answer": "Retrieval-Augmented Generation combines information retrieval with language generation, retrieving relevant document sections to use as context for answering questions, ensuring the generated answers are supported by the provided context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The full definition, with a closing clause taken from the faithfulness sentence in the same neighbourhood.",
+      "source": "phase3_llm_lexical_think"
+    },
+    {
+      "test_id": 8,
+      "question": "What is Retrieval-Augmented Generation?",
+      "answer": "Retrieval-Augmented Generation combines information retrieval with language generation.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.6,
+      "used_for_tuning": true,
+      "note": "The first half of the definition. True, and it answers the question, but it stops short of the reference, so completeness should score below correctness.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 8,
+      "question": "What is Retrieval-Augmented Generation?",
+      "answer": "Retrieval-Augmented Generation combines information retrieval with language generation. It retrieves relevant document sections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is supported by the provided context. Context relevance measures whether the retrieved information is relevant to the user's question.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The first two sentences answer the question. The last two are true but off topic, so relevance should be docked.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 8,
+      "question": "What is Retrieval-Augmented Generation?",
+      "answer": "{ \"answer\": \"Retrieval-Augmented Generation is a method that combines information retrieval with language generation, using relevant document sections as context to answer questions, ensuring the generated answers are supported by the provided information.\", \"ab",
+      "human_label": "incorrect",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 4,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 4
+      },
+      "judge_reason": "partly right, omits context relevance measure",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The generator ran into its token limit and emitted a truncated JSON fragment instead of an answer. The content inside is right, but what reached the user is malformed.",
+      "source": "phase4_hybrid_think"
+    },
+    {
+      "test_id": 9,
+      "question": "What does faithfulness measure?",
+      "answer": "Faithfulness measures whether an AI-generated answer is supported by the provided context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 9,
+      "question": "What does faithfulness measure?",
+      "answer": "faithfulness measures whether an AI-generated answer is supported by the provided context",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The source sentence, lower case and without a full stop.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 9,
+      "question": "What does faithfulness measure?",
+      "answer": "faithfulness measures whether an AI-generated answer is supported by the provided context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The source sentence, lower case.",
+      "source": "phase3_llm_lexical_think"
+    },
+    {
+      "test_id": 10,
+      "question": "What does context relevance measure?",
+      "answer": "Context relevance measures whether the retrieved information is relevant to the user's question.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 11,
+      "question": "How many people does the company employ?",
+      "answer": "I don't know based on the available context.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 2,
+        "groundedness": 2,
+        "completeness": 2
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "The knowledge base states the headcount, so refusing to answer is a failure. The chunks that were retrieved did not contain it, which is a retrieval failure that a context-bound judge cannot see.",
+      "source": "phase4_hybrid_think"
+    },
+    {
+      "test_id": 11,
+      "question": "How many people does the company employ?",
+      "answer": "The company employs approximately 120 people",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The number, without the trailing full stop.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 11,
+      "question": "How many people does the company employ?",
+      "answer": "The company employs approximately 120 people across engineering, sales, and customer support.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 11,
+      "question": "How many people does the company employ?",
+      "answer": "The company employs approximately 120 people.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "The number, as a sentence.",
+      "source": "phase3_llm_lexical_think"
+    },
+    {
+      "test_id": 12,
+      "question": "When is the engineering planning meeting?",
+      "answer": "The engineering planning meeting is held every Monday morning.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_hybrid"
+    },
+    {
+      "test_id": 12,
+      "question": "When is the engineering planning meeting?",
+      "answer": "The engineering planning meeting takes place every Monday morning.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 12,
+      "question": "When is the engineering planning meeting?",
+      "answer": "The engineering team holds a planning meeting every Monday morning.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 13,
+      "question": "How is code reviewed before it is merged?",
+      "answer": "Code changes are reviewed through pull requests on GitHub before they are merged into the main branch.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 13,
+      "question": "How is code reviewed before it is merged?",
+      "answer": "Code is reviewed through pull requests on GitHub before it is merged into the main branch.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical_think"
+    },
+    {
+      "test_id": 13,
+      "question": "How is code reviewed before it is merged?",
+      "answer": "Code is reviewed through pull requests on GitHub before it is merged.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 14,
+      "question": "What tool runs the evaluation suite?",
+      "answer": "The evaluation suite is executed with pytest and runs as part of the continuous integration pipeline.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 4,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 2
+      },
+      "judge_reason": "missing direct answer to the question about the tool",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 14,
+      "question": "What tool runs the evaluation suite?",
+      "answer": "pytest",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": true,
+      "note": "Names the tool, which is all the question asked.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 15,
+      "question": "How often is customer data backed up?",
+      "answer": "Customer data is stored in an encrypted database that is backed up every night.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Answers the question, with the leading clause the source also states.",
+      "source": "baseline"
+    },
+    {
+      "test_id": 15,
+      "question": "How often is customer data backed up?",
+      "answer": "Every night",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Answers the question.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 15,
+      "question": "How often is customer data backed up?",
+      "answer": "every night",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Answers the question, lower case.",
+      "source": "phase3_llm_lexical_think"
+    },
+    {
+      "test_id": 16,
+      "question": "When does the company open its new London office?",
+      "answer": "I don't know based on the available context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "The knowledge base says nothing about a London office. Declining is right.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 17,
+      "question": "How many sick leave days do employees receive?",
+      "answer": "Employees receive 18 annual leave days per calendar year.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "The question asks about sick leave. The answer is about annual leave, which is a different question, and a reader would take it as a claim about sick leave.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 17,
+      "question": "How many sick leave days do employees receive?",
+      "answer": "I don't know based on the available context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "The knowledge base says nothing about sick leave. Declining is right.",
+      "source": "phase3_llm_lexical_think"
+    },
+    {
+      "test_id": 18,
+      "question": "What is the name of the chief executive officer?",
+      "answer": "I don't know based on the available context.",
+      "human_label": "correct",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "The knowledge base names no chief executive. Declining is right.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 19,
+      "question": "What is the capital of Mars?",
+      "answer": "I don't know based on the available context.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "Not answerable from the knowledge base. Declining is right.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 20,
+      "question": "What is the standard work week?",
+      "answer": "The standard work week is Monday through Friday.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.8333,
+      "used_for_tuning": true,
+      "note": "Says the same as the reference. The token rule scores 0.833 token recall and calls it wrong.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 20,
+      "question": "What is the standard work week?",
+      "answer": "The standard work week runs Monday through Friday.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": false,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical_think"
+    },
+    {
+      "test_id": 21,
+      "question": "How does the company encourage employees to improve their technical skills?",
+      "answer": "The company encourages employees to improve their technical skills through practical projects and continuous learning.",
+      "human_label": "correct",
+      "judge_label": "correct",
+      "token_rule_label": "correct",
+      "judge_scores": {
+        "correctness": 5,
+        "relevance": 5,
+        "groundedness": 5,
+        "completeness": 5
+      },
+      "judge_reason": "matches reference answer",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 1.0,
+      "used_for_tuning": true,
+      "note": "Matches the source sentence.",
+      "source": "phase3_llm_lexical"
+    },
+    {
+      "test_id": 1,
+      "question": "Where is the company office?",
+      "answer": "Every night",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 15, paired with the question for case 1. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 15"
+    },
+    {
+      "test_id": 2,
+      "question": "How many annual leave days do employees receive?",
+      "answer": "Context relevance measures whether the retrieved information is relevant to the user's question.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 10, paired with the question for case 2. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 10"
+    },
+    {
+      "test_id": 3,
+      "question": "Which programming language does the company use?",
+      "answer": "The engineering planning meeting takes place every Monday morning.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 2,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "wrong answer, does not address the question",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 12, paired with the question for case 3. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 12"
+    },
+    {
+      "test_id": 4,
+      "question": "Which city is the office in?",
+      "answer": "pytest",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 14, paired with the question for case 4. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 14"
+    },
+    {
+      "test_id": 5,
+      "question": "How many leave days are provided?",
+      "answer": "The company office is located in Bengaluru, Karnataka.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "does not answer the question",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 1, paired with the question for case 5. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 1"
+    },
+    {
+      "test_id": 6,
+      "question": "Which programming language is used for the automation projects?",
+      "answer": "The standard work week is Monday through Friday.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 20, paired with the question for case 6. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 20"
+    },
+    {
+      "test_id": 7,
+      "question": "What does the AI team work on?",
+      "answer": "Code is reviewed through pull requests on GitHub before it is merged.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 13, paired with the question for case 7. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 13"
+    },
+    {
+      "test_id": 8,
+      "question": "What is Retrieval-Augmented Generation?",
+      "answer": "The company employs approximately 120 people",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "does not answer the question",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 11, paired with the question for case 8. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 11"
+    },
+    {
+      "test_id": 9,
+      "question": "What does faithfulness measure?",
+      "answer": "Bengaluru",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "wrong answer to a different question",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 4, paired with the question for case 9. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 4"
+    },
+    {
+      "test_id": 10,
+      "question": "What does context relevance measure?",
+      "answer": "Employees receive 18 annual leave days per calendar year.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the question asked about context relevance, but the answer provided does not address this question at all",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 2, paired with the question for case 10. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 2"
+    },
+    {
+      "test_id": 11,
+      "question": "How many people does the company employ?",
+      "answer": "Retrieval-Augmented Generation combines information retrieval with language generation. It retrieves relevant document sections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is supported by the provided context. Context relevance measures whether the retrieved information is relevant to the user's question.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 0.5,
+      "order_consistent": false,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 8, paired with the question for case 11. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 8"
+    },
+    {
+      "test_id": 12,
+      "question": "When is the engineering planning meeting?",
+      "answer": "The AI team works on machine learning, large language models, AI evaluation, and automation solutions.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 2,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "wrong answer, does not address the question about the engineering planning meeting",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 7, paired with the question for case 12. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 7"
+    },
+    {
+      "test_id": 13,
+      "question": "How is code reviewed before it is merged?",
+      "answer": "The company encourages employees to improve their technical skills through practical projects and continuous learning.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the question was not answered",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 21, paired with the question for case 13. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 21"
+    },
+    {
+      "test_id": 14,
+      "question": "What tool runs the evaluation suite?",
+      "answer": "Python",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 2,
+        "relevance": 2,
+        "groundedness": 1,
+        "completeness": 2
+      },
+      "judge_reason": "wrong answer to a different question",
+      "sample_agreement": 0.5,
+      "order_consistent": false,
+      "token_recall": 0.0,
+      "used_for_tuning": true,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 6, paired with the question for case 14. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 6"
+    },
+    {
+      "test_id": 15,
+      "question": "How often is customer data backed up?",
+      "answer": "faithfulness measures whether an AI-generated answer is supported by the provided context",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 1,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "the sources do not say",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 9, paired with the question for case 15. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 9"
+    },
+    {
+      "test_id": 20,
+      "question": "What is the standard work week?",
+      "answer": "18 annual leave days per calendar year",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 2,
+        "relevance": 1,
+        "groundedness": 1,
+        "completeness": 1
+      },
+      "judge_reason": "wrong answer to a different question",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 5, paired with the question for case 20. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 5"
+    },
+    {
+      "test_id": 21,
+      "question": "How does the company encourage employees to improve their technical skills?",
+      "answer": "The company uses Python as its primary programming language.",
+      "human_label": "incorrect",
+      "judge_label": "incorrect",
+      "token_rule_label": "incorrect",
+      "judge_scores": {
+        "correctness": 2,
+        "relevance": 5,
+        "groundedness": 1,
+        "completeness": 2
+      },
+      "judge_reason": "wrong answer, does not address the question about skill improvement",
+      "sample_agreement": 1.0,
+      "order_consistent": true,
+      "token_recall": 0.0,
+      "used_for_tuning": false,
+      "note": "A negative control. The answer and the sources are the ones the framework produced for case 3, paired with the question for case 21. The answer is true about a different subject and does not answer the question.",
+      "source": "mismatch:case 3"
+    }
+  ]
+}

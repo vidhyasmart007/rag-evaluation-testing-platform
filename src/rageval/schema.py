@@ -120,6 +120,7 @@ class CaseResult:
     latency_ms: int = 0
     generator: str = ""
     cached: bool = False
+    judge: dict[str, Any] = field(default_factory=dict)
     error: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -144,6 +145,7 @@ class CaseResult:
             "latency_ms": self.latency_ms,
             "generator": self.generator,
             "cached": self.cached,
+            "judge": self.judge,
             "error": self.error,
         }
 

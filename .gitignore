@@ -235,3 +235,6 @@ reports/*
 !reports/latest.csv
 !reports/phase3_*.json
 !reports/phase3_*.csv
+!reports/phase4_*.json
+!reports/phase4_*.csv
+!reports/judge_validation.json
