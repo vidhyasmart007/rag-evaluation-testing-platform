@@ -84,7 +84,7 @@ make install   # editable install, with a macOS fix (see Troubleshooting)
 │   └── metrics/
 │       ├── answer.py           # token_f1, exact_match, faithfulness, ...
 │       └── retrieval.py        # hit@k, recall@k, MRR
-├── tests/                      # 87 tests
+├── tests/                      # 103 tests
 ├── Makefile
 └── pyproject.toml
 ```
@@ -214,6 +214,19 @@ Each run writes `reports/<run_id>.json` and `reports/<run_id>.csv`, and refreshe
 `reports/latest.json` and `reports/latest.csv`. The JSON report contains the
 full configuration, the dataset version and content hash, the git commit, the
 per-case metrics and the aggregates — enough to reproduce and to diff.
+
+### Caching
+
+Generated answers are cached on disk under `.cache/`, keyed by the question,
+the retrieved context and the model name. Re-running the same evaluation
+serves every answer from disk instead of regenerating it, which matters once
+the generator is a hosted model with a per-day request cap.
+
+The cache key also includes a fingerprint of the package source, so editing
+any module invalidates every entry. A stale answer can never be served after
+a change to the tokenizer, the metrics or the generator. `--no-cache` turns it
+off, and the `cache_hits` aggregate reports how many cases were served from
+disk.
 
 ---
 
@@ -386,10 +399,11 @@ left to rot, and this README replaced the one that described them.
 make test          # or: python -m pytest
 ```
 
-87 tests across seven modules. They cover the tokenizer and stemmer, chunking
+103 tests across eight modules. They cover the tokenizer and stemmer, chunking
 and BM25 ranking, every metric, dataset validation and the legacy format,
-configuration overrides and the no-secrets rule, generator abstention, and the
-runner end to end including the report files it writes.
+configuration overrides and the no-secrets rule, generator abstention, the
+response cache, and the runner end to end including the report files it
+writes.
 
 The suite runs with no install step: `pyproject.toml` sets
 `pythonpath = ["src"]` for pytest.

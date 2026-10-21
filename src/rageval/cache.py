@@ -66,3 +66,20 @@ class DiskCache:
         value = compute()
         self.set(key, value)
         return value, False
+
+
+def framework_fingerprint() -> str:
+    """A short hash of the package source.
+
+    Cached entries are only valid for as long as the code that produced
+    them. Including this fingerprint in the cache key means that editing
+    any module in the package invalidates every entry, so a stale answer
+    can never be served after a change to the tokenizer, the metrics or
+    the generator.
+    """
+    package_dir = Path(__file__).resolve().parent
+    digest = hashlib.sha256()
+    for path in sorted(package_dir.rglob("*.py")):
+        digest.update(path.relative_to(package_dir).as_posix().encode("utf-8"))
+        digest.update(path.read_bytes())
+    return digest.hexdigest()[:16]

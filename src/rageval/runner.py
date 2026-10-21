@@ -15,9 +15,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from time import perf_counter
 
+from rageval.cache import DiskCache, framework_fingerprint
 from rageval.config import EvalConfig
 from rageval.dataset import load_dataset
 from rageval.generation.base import GenerationResult, Generator
+from rageval.generation.cached import CachedGenerator
 from rageval.generation.extractive import ExtractiveGenerator
 from rageval.metrics.answer import (
     evaluate_answer_relevance,
@@ -68,11 +70,23 @@ def build_generator(config: EvalConfig) -> Generator:
     """Create the generator described by the configuration."""
     provider = config.generation.provider
     if provider == "extractive":
-        return ExtractiveGenerator(min_answer_score=config.generation.min_answer_score)
-    raise ValueError(
-        f"Unknown generation provider '{provider}'. Available: extractive. "
-        "The Ollama provider lands in a later phase."
-    )
+        generator: Generator = ExtractiveGenerator(
+            min_answer_score=config.generation.min_answer_score
+        )
+    else:
+        raise ValueError(
+            f"Unknown generation provider '{provider}'. Available: extractive. "
+            "The Ollama provider lands in a later phase."
+        )
+
+    if config.use_cache:
+        cache = DiskCache(Path(config.cache_dir), enabled=True)
+        generator = CachedGenerator(
+            generator,
+            cache,
+            namespace=f"generation:{framework_fingerprint()}",
+        )
+    return generator
 
 
 def compute_metrics(
@@ -164,6 +178,7 @@ def evaluate_case(
             metrics=compute_metrics(case, chunks, generated, context, config),
             latency_ms=latency_ms,
             generator=generated.model,
+            cached=generated.cached,
         )
     except Exception as error:  # noqa: BLE001 - one bad case must not kill a run
         latency_ms = int((perf_counter() - started) * 1000)
@@ -197,6 +212,7 @@ def aggregate(cases: list[CaseResult]) -> dict[str, float]:
     aggregates["answerable_cases"] = float(len(answerable))
     aggregates["unanswerable_cases"] = float(len(unanswerable))
     aggregates["error_count"] = float(sum(1 for case in cases if case.error))
+    aggregates["cache_hits"] = float(sum(1 for case in cases if case.cached))
 
     if cases:
         aggregates["abstention_rate"] = round(

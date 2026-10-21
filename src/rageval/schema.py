@@ -118,6 +118,7 @@ class CaseResult:
     metrics: dict[str, float] = field(default_factory=dict)
     latency_ms: int = 0
     generator: str = ""
+    cached: bool = False
     error: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -140,6 +141,7 @@ class CaseResult:
             "metrics": self.metrics,
             "latency_ms": self.latency_ms,
             "generator": self.generator,
+            "cached": self.cached,
             "error": self.error,
         }
 

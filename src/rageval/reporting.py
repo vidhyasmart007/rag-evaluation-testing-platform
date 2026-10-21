@@ -26,6 +26,7 @@ _CSV_BASE_FIELDS = [
     "retrieved_sentence_ids",
     "top_score",
     "generator",
+    "cached",
     "latency_ms",
     "error",
 ]
@@ -72,6 +73,7 @@ def write_reports(run: RunResult, config: EvalConfig) -> tuple[Path, Path]:
                 ),
                 "top_score": max((c.score for c in case.retrieved), default=0.0),
                 "generator": case.generator,
+                "cached": case.cached,
                 "latency_ms": case.latency_ms,
                 "error": case.error or "",
             }
