@@ -1,6 +1,6 @@
 {
   "run_id": "baseline",
-  "created_at": "2026-10-21T10:55:26.750877+00:00",
+  "created_at": "2026-10-21T10:56:36.843129+00:00",
   "config": {
     "dataset_path": "/Users/vidhya/Documents/llm-evaluation-framework/data/eval_dataset.json",
     "knowledge_base_path": "/Users/vidhya/Documents/llm-evaluation-framework/data/knowledge_base.txt",
@@ -51,7 +51,7 @@
   },
   "dataset_version": "2.0.0",
   "dataset_hash": "9ce479197df77dd8",
-  "git_commit": "fe824b5",
+  "git_commit": "35a93fc",
   "aggregates": {
     "abstained": 0.1429,
     "abstention_correct": 0.9524,
