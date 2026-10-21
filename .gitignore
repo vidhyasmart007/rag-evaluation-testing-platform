@@ -218,7 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-# Project-specific ignore rules
+
+# project specific ignore rules
 .venv/
 __pycache__/
 *.py[cod]
