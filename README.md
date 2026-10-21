@@ -1,24 +1,29 @@
 # RAG Evaluation and Testing Platform
 
-A Python-based prototype for evaluating document retrieval and
-answer quality in Retrieval-Augmented Generation (RAG) workflows.
+A Python-based prototype for testing document retrieval and evaluating answer quality in a Retrieval-Augmented Generation (RAG) workflow.
 
 ## Project Overview
 
-This project demonstrates a baseline evaluation workflow that
-loads a knowledge base, retrieves relevant text chunks, selects
-an extractive answer, calculates evaluation scores, and exports
-results to CSV.
+This project demonstrates a baseline approach to evaluating a document-based question-answering pipeline. It retrieves relevant text from a knowledge base, selects an answer from the retrieved context, calculates evaluation scores, and generates CSV reports.
 
 ## Features
 
 - Document loading and text chunking
 - Lexical retrieval using word-overlap scoring
 - Extractive answer selection
-- Answer relevance scoring
+- Basic answer relevance evaluation
 - Lexical faithfulness approximation
+- Retrieval relevance scoring
 - CSV evaluation reports
 - Automated unit tests using pytest
+
+## Technology Stack
+
+- Python
+- JSON for structured evaluation datasets
+- CSV for evaluation reports
+- pytest for automated testing
+- Git and GitHub for version control
 
 ## Project Structure
 
@@ -42,30 +47,29 @@ LLM-EVALUATION-FRAMEWORK/
 └── README.md
 ```
 
-## Technologies Used
+## Setup Instructions
 
-- Python
-- JSON
-- CSV
-- pytest
-- Git and GitHub
+### 1. Clone the repository
 
-## Setup
+```bash
+git clone https://github.com/vidhyasmart007/rag-evaluation-testing-platform.git
+cd rag-evaluation-testing-platform
+```
 
-Clone the repository and navigate into the project directory.
-
-Create and activate a virtual environment:
+### 2. Create a virtual environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Install the testing dependency:
+### 3. Install the testing dependency
 
 ```bash
 python -m pip install pytest
 ```
+
+The retrieval and evaluation modules use Python's standard library. No external LLM API key is required for the current prototype.
 
 ## Run the RAG Pipeline
 
@@ -75,11 +79,19 @@ python src/rag_pipeline.py
 
 Enter a question about the sample knowledge base when prompted.
 
-The pipeline retrieves text chunks, selects an answer from the
-retrieved context, calculates baseline evaluation scores, and
-writes the results to:
+The pipeline retrieves relevant text chunks, selects an extractive answer, calculates baseline evaluation scores, and saves the results to:
 
 `reports/rag_evaluation_report.csv`
+
+## Run the Evaluation Script
+
+```bash
+python day2.py
+```
+
+This evaluates the predefined dataset in `data/eval_dataset.json` and generates:
+
+`reports/evaluation_report.csv`
 
 ## Run Automated Tests
 
@@ -87,45 +99,42 @@ writes the results to:
 python -m pytest -v
 ```
 
-The current unit tests cover basic answer relevance, lexical
-faithfulness behavior, and empty retrieval handling.
+The initial test suite contains four tests covering basic answer relevance, lexical faithfulness behavior, and empty retrieval handling.
 
-## Evaluation Methodology
+Run the tests yourself to see the current results.
+
+## Evaluation Metrics
 
 ### Retrieval Relevance
 
-Uses word-overlap scoring to rank document chunks against a
-question.
+Uses word overlap between a question and retrieved text chunks to calculate a baseline relevance score.
 
 ### Answer Relevance
 
-Uses lexical overlap between the question and selected answer.
+Measures lexical overlap between the question and the selected answer.
 
 ### Faithfulness Approximation
 
-Measures the proportion of answer terms that also appear in the
-retrieved context.
+Measures how many answer terms also appear in the retrieved context.
 
-These are simple baseline heuristics, not validated semantic
-evaluation metrics.
+These metrics are simple heuristics and should not be interpreted as validated measures of semantic accuracy.
 
 ## Limitations
 
 - Retrieval uses lexical matching rather than semantic embeddings.
 - Answer selection is extractive rather than LLM-generated.
-- Lexical overlap cannot reliably detect contradictions or
-  determine whether an answer is semantically supported.
-- The current unit tests do not establish production readiness.
-- No external LLM or embedding model is integrated yet.
+- Word overlap cannot reliably detect contradictions or establish semantic equivalence.
+- The current test suite provides basic functional checks, not comprehensive validation.
+- The prototype does not currently integrate an external LLM or embedding model.
 
 ## Future Improvements
 
-- Integrate embedding-based semantic retrieval.
-- Add an LLM-based answer-generation component.
+- Add embedding-based semantic retrieval.
+- Integrate an LLM for answer generation.
 - Evaluate retrieval precision, recall, and ranking quality.
 - Add reference-based answer evaluation.
-- Expand automated tests with edge cases and integration tests.
-- Add a larger, labeled evaluation dataset.
+- Expand the test suite with integration and edge-case tests.
+- Explore established RAG evaluation frameworks such as Ragas or DeepEval.
 
 ## Author
 
