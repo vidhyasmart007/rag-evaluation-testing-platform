@@ -10,6 +10,7 @@ the command line, the HTTP API and the dashboard.
 
 from __future__ import annotations
 
+import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,11 +33,15 @@ from rageval.metrics.answer import (
 from rageval.metrics.retrieval import (
     evaluate_retrieval,
     hit_at_k,
+    precision_at_k,
     recall_at_k,
     reciprocal_rank,
 )
 from rageval.reporting import write_reports
 from rageval.retrieval.base import Retriever
+from rageval.retrieval.dense import DenseRetriever
+from rageval.retrieval.embeddings import CachedEmbedder, Embedder, OllamaEmbedder
+from rageval.retrieval.hybrid import HybridRetriever
 from rageval.retrieval.lexical import BM25Retriever, build_chunks, split_into_sentences
 from rageval.schema import CaseResult, RetrievedChunk, RunResult, TestCase
 
@@ -46,6 +51,33 @@ def load_knowledge_base(path: Path) -> str:
     if not Path(path).exists():
         raise FileNotFoundError(f"Knowledge base not found: {path}")
     return Path(path).read_text(encoding="utf-8")
+
+
+def build_embedder(config: EvalConfig) -> Embedder:
+    """Create the embedder that backs the dense and hybrid retrievers.
+
+    The API key is read from the environment when one is configured. It is
+    never written to a configuration file, so a run can be reproduced from
+    the report without leaking a secret.
+    """
+    dense = config.dense
+
+    api_key = None
+    if dense.api_key_env:
+        api_key = os.environ.get(dense.api_key_env)
+
+    embedder: Embedder = OllamaEmbedder(
+        dense.model,
+        base_url=dense.base_url,
+        api_key=api_key,
+        timeout=dense.timeout_seconds,
+        batch_size=dense.batch_size,
+    )
+
+    if config.use_cache:
+        cache = DiskCache(Path(config.cache_dir), enabled=True)
+        embedder = CachedEmbedder(embedder, cache, namespace="embeddings")
+    return embedder
 
 
 def build_retriever(config: EvalConfig, document: str) -> Retriever:
@@ -58,12 +90,31 @@ def build_retriever(config: EvalConfig, document: str) -> Retriever:
     )
 
     retriever_name = config.retrieval.retriever
-    if retriever_name != "lexical":
+    if retriever_name == "lexical":
+        return BM25Retriever(chunks)
+
+    if retriever_name not in ("dense", "hybrid"):
         raise ValueError(
-            f"Unknown retriever '{retriever_name}'. Available: lexical. "
-            "Dense and hybrid retrievers land in a later phase."
+            f"Unknown retriever '{retriever_name}'. "
+            "Available: lexical, dense, hybrid."
         )
-    return BM25Retriever(chunks)
+
+    dense = DenseRetriever(
+        chunks,
+        build_embedder(config),
+        query_prefix=config.dense.query_prefix,
+        document_prefix=config.dense.document_prefix,
+    )
+    if retriever_name == "dense":
+        return dense
+
+    return HybridRetriever(
+        chunks,
+        BM25Retriever(chunks),
+        dense,
+        lexical_weight=config.retrieval.lexical_weight,
+        dense_weight=config.retrieval.dense_weight,
+    )
 
 
 def build_generator(config: EvalConfig) -> Generator:
@@ -108,6 +159,11 @@ def compute_metrics(
         "answer_relevance": round(evaluate_answer_relevance(case.question, answer), 6),
         "faithfulness": round(evaluate_faithfulness(answer, context), 6),
         "abstained": 1.0 if generated.abstained else 0.0,
+        # Whether the retriever refused to answer at all. This is a
+        # retrieval level decision, made before the generator sees
+        # anything, and it is the first place a question the knowledge
+        # base cannot answer should be turned away.
+        "retrieval_rejected": 1.0 if not chunks else 0.0,
     }
 
     if case.relevant_sentence_ids:
@@ -117,6 +173,9 @@ def compute_metrics(
         )
         metrics["reciprocal_rank"] = round(
             reciprocal_rank(chunks, case.relevant_sentence_ids), 6
+        )
+        metrics["precision_at_k"] = round(
+            precision_at_k(chunks, case.relevant_sentence_ids), 6
         )
 
     if case.reference_answer:
@@ -161,7 +220,7 @@ def evaluate_case(
         chunks = retriever.retrieve(
             case.question,
             config.retrieval.top_k,
-            config.retrieval.min_score,
+            config.retrieval.resolved_min_score,
         )
         context = "\n".join(chunk.text for chunk in chunks)
         generated = generator.generate(case.question, context)
@@ -224,6 +283,26 @@ def aggregate(cases: list[CaseResult]) -> dict[str, float]:
         )
         aggregates["hallucination_rate"] = round(
             sum(1 for case in unanswerable if not case.abstained) / len(unanswerable), 4
+        )
+        aggregates["unanswerable_rejection_rate"] = round(
+            sum(
+                1
+                for case in unanswerable
+                if case.metrics.get("retrieval_rejected") == 1.0
+            )
+            / len(unanswerable),
+            4,
+        )
+
+    if answerable:
+        aggregates["answerable_rejection_rate"] = round(
+            sum(
+                1
+                for case in answerable
+                if case.metrics.get("retrieval_rejected") == 1.0
+            )
+            / len(answerable),
+            4,
         )
 
     latencies = [case.latency_ms for case in cases]

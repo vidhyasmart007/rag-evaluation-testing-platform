@@ -47,6 +47,32 @@ def recall_at_k(
     return len(covered) / len(relevant)
 
 
+def precision_at_k(
+    retrieved_chunks: Sequence[RetrievedChunk],
+    relevant_sentence_ids: Sequence[int],
+) -> float:
+    """Share of the retrieved chunks that contain something relevant.
+
+    Recall asks how much of the answer was found. Precision asks how much
+    of the context was noise. The second question matters for a RAG
+    pipeline, because every irrelevant chunk is a chance for the generator
+    to answer from the wrong sentence.
+
+    A chunk counts as relevant when it contains at least one of the
+    labelled sentences, which is the usual convention for overlapping
+    chunks.
+    """
+    if not relevant_sentence_ids:
+        return 0.0
+    if not retrieved_chunks:
+        return 0.0
+    relevant = set(relevant_sentence_ids)
+    useful = sum(
+        1 for chunk in retrieved_chunks if relevant & set(chunk.sentence_ids)
+    )
+    return useful / len(retrieved_chunks)
+
+
 def reciprocal_rank(
     retrieved_chunks: Sequence[RetrievedChunk],
     relevant_sentence_ids: Sequence[int],

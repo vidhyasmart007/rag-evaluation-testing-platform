@@ -15,6 +15,7 @@ from rageval.metrics.answer import (
 from rageval.metrics.retrieval import (
     evaluate_retrieval,
     hit_at_k,
+    precision_at_k,
     recall_at_k,
     reciprocal_rank,
 )
@@ -96,3 +97,21 @@ def test_reciprocal_rank_rewards_earlier_hits():
     assert reciprocal_rank([chunk(0, (9,)), chunk(1, (2,))], [2]) == pytest.approx(0.5)
     assert reciprocal_rank([chunk(0, (2,))], [2]) == pytest.approx(1.0)
     assert reciprocal_rank([chunk(0, (9,))], [2]) == 0.0
+
+
+def test_precision_at_k_counts_the_useful_chunks():
+    chunks = [chunk(0, (1,)), chunk(1, (9,)), chunk(2, (2,))]
+    assert precision_at_k(chunks, [1]) == pytest.approx(1 / 3)
+
+
+def test_precision_at_k_is_one_when_every_chunk_is_useful():
+    chunks = [chunk(0, (1,)), chunk(1, (2,))]
+    assert precision_at_k(chunks, [1, 2]) == pytest.approx(1.0)
+
+
+def test_precision_at_k_is_zero_without_retrieved_chunks():
+    assert precision_at_k([], [1]) == 0.0
+
+
+def test_precision_at_k_is_zero_without_labels():
+    assert precision_at_k([chunk(0, (1,))], []) == 0.0

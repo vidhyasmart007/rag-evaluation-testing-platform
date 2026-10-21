@@ -113,3 +113,73 @@ def test_an_unknown_generator_is_rejected(config):
     config.generation.provider = "magic"
     with pytest.raises(ValueError, match="Unknown generation provider"):
         build_generator(config)
+
+
+class FakeEmbedder:
+    """Stands in for the model server, so no test needs Ollama running."""
+
+    name = "fake"
+
+    def embed(self, texts):
+        return [[1.0, 0.0] for _ in texts]
+
+
+def test_the_dense_retriever_can_be_built(config, monkeypatch):
+    monkeypatch.setattr("rageval.runner.build_embedder", lambda config: FakeEmbedder())
+    config.retrieval.retriever = "dense"
+
+    retriever = build_retriever(config, "The office is in Bengaluru.")
+
+    assert retriever.name == "dense"
+
+
+def test_the_hybrid_retriever_can_be_built(config, monkeypatch):
+    monkeypatch.setattr("rageval.runner.build_embedder", lambda config: FakeEmbedder())
+    config.retrieval.retriever = "hybrid"
+
+    retriever = build_retriever(config, "The office is in Bengaluru.")
+
+    assert retriever.name == "hybrid"
+
+
+def test_the_hybrid_weights_reach_the_retriever(config, monkeypatch):
+    monkeypatch.setattr("rageval.runner.build_embedder", lambda config: FakeEmbedder())
+    config.retrieval.retriever = "hybrid"
+    config.retrieval.lexical_weight = 0.7
+    config.retrieval.dense_weight = 0.3
+
+    retriever = build_retriever(config, "The office is in Bengaluru.")
+
+    assert retriever.lexical_weight == pytest.approx(0.7)
+    assert retriever.dense_weight == pytest.approx(0.3)
+
+
+def test_a_dense_run_scores_the_dataset(config, monkeypatch):
+    monkeypatch.setattr("rageval.runner.build_embedder", lambda config: FakeEmbedder())
+    config.retrieval.retriever = "dense"
+
+    run = run_evaluation(config)
+
+    assert run.aggregates["total_cases"] == 3.0
+    assert run.aggregates["error_count"] == 0.0
+
+
+def test_a_run_records_the_precision_of_the_context(config):
+    run = run_evaluation(config)
+    case = next(case for case in run.cases if case.test_id == 1)
+
+    assert "precision_at_k" in case.metrics
+
+
+def test_a_run_records_whether_the_retriever_refused(config):
+    run = run_evaluation(config)
+    case = next(case for case in run.cases if case.test_id == 3)
+
+    assert case.metrics["retrieval_rejected"] in (0.0, 1.0)
+
+
+def test_the_aggregate_reports_the_rejection_rate(config):
+    run = run_evaluation(config)
+
+    assert "unanswerable_rejection_rate" in run.aggregates
+    assert "answerable_rejection_rate" in run.aggregates

@@ -118,3 +118,66 @@ def test_api_keys_are_referenced_by_name_and_never_stored():
 
 def test_the_generation_config_has_no_plain_api_key_field():
     assert "api_key" not in {field for field in GenerationConfig().to_dict()}
+
+
+def test_the_dense_section_has_usable_defaults():
+    config = EvalConfig()
+    assert config.dense.model == "embeddinggemma"
+    assert config.dense.base_url.startswith("http")
+    assert config.dense.api_key_env is None
+
+
+def test_the_dense_section_can_be_overridden():
+    config = EvalConfig()
+    config.apply_overrides(
+        [
+            "dense.model=bge-m3",
+            "dense.base_url=http://localhost:11434/v1",
+            "dense.batch_size=4",
+        ]
+    )
+    assert config.dense.model == "bge-m3"
+    assert config.dense.batch_size == 4
+
+
+def test_each_retriever_has_its_own_relevance_floor():
+    lexical = EvalConfig()
+    lexical.retrieval.retriever = "lexical"
+    dense = EvalConfig()
+    dense.retrieval.retriever = "dense"
+    hybrid = EvalConfig()
+    hybrid.retrieval.retriever = "hybrid"
+
+    assert lexical.retrieval.resolved_min_score == 0.30
+    assert dense.retrieval.resolved_min_score == 0.35
+    assert hybrid.retrieval.resolved_min_score == 0.40
+
+
+def test_the_floor_can_be_overridden_for_the_active_retriever():
+    config = EvalConfig()
+    config.apply_overrides(["retrieval.retriever=dense", "retrieval.min_score=0.6"])
+
+    assert config.retrieval.resolved_min_score == 0.6
+
+
+def test_the_report_records_the_floor_that_was_applied():
+    config = EvalConfig()
+    config.retrieval.retriever = "hybrid"
+
+    assert config.to_dict()["retrieval"]["min_score"] == 0.40
+
+
+def test_a_read_only_property_cannot_be_overridden():
+    config = EvalConfig()
+    with pytest.raises(ValueError, match="Unknown config option"):
+        config.apply_overrides(["retrieval.resolved_min_score=0.9"])
+
+
+def test_the_hybrid_weights_are_configurable():
+    config = EvalConfig()
+    config.apply_overrides(
+        ["retrieval.lexical_weight=0.7", "retrieval.dense_weight=0.3"]
+    )
+
+    assert config.retrieval.lexical_weight == 0.7
+    assert config.retrieval.dense_weight == 0.3

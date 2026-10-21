@@ -157,7 +157,7 @@ def command_retrieve(args: argparse.Namespace) -> int:
     chunks = retriever.retrieve(
         args.question,
         config.retrieval.top_k,
-        config.retrieval.min_score,
+        config.retrieval.resolved_min_score,
     )
 
     if not chunks:

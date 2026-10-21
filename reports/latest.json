@@ -1,6 +1,6 @@
 {
   "run_id": "baseline",
-  "created_at": "2026-10-21T10:00:48.185694+00:00",
+  "created_at": "2026-10-21T10:55:26.750877+00:00",
   "config": {
     "dataset_path": "/Users/vidhya/Documents/llm-evaluation-framework/data/eval_dataset.json",
     "knowledge_base_path": "/Users/vidhya/Documents/llm-evaluation-framework/data/knowledge_base.txt",
@@ -14,7 +14,18 @@
       "top_k": 3,
       "chunk_size": 50,
       "chunk_overlap": 1,
-      "min_score": 0.15
+      "min_score": 0.3,
+      "lexical_weight": 0.5,
+      "dense_weight": 0.5
+    },
+    "dense": {
+      "model": "embeddinggemma",
+      "base_url": "http://localhost:11434/v1",
+      "api_key_env": null,
+      "timeout_seconds": 120.0,
+      "batch_size": 16,
+      "query_prefix": "",
+      "document_prefix": ""
     },
     "generation": {
       "provider": "extractive",
@@ -40,7 +51,7 @@
   },
   "dataset_version": "2.0.0",
   "dataset_hash": "9ce479197df77dd8",
-  "git_commit": "229d5a7",
+  "git_commit": "fe824b5",
   "aggregates": {
     "abstained": 0.1429,
     "abstention_correct": 0.9524,
@@ -50,9 +61,11 @@
     "faithfulness": 0.8571,
     "hit_at_k": 1.0,
     "numeric_match": 1.0,
+    "precision_at_k": 0.7843,
     "recall_at_k": 1.0,
     "reciprocal_rank": 1.0,
-    "retrieval_relevance": 0.7541,
+    "retrieval_rejected": 0.1429,
+    "retrieval_relevance": 0.7436,
     "token_f1": 0.6097,
     "token_recall": 0.9765,
     "total_cases": 21.0,
@@ -63,6 +76,8 @@
     "abstention_rate": 0.1429,
     "unanswerable_abstention_rate": 0.75,
     "hallucination_rate": 0.25,
+    "unanswerable_rejection_rate": 0.75,
+    "answerable_rejection_rate": 0.0,
     "mean_latency_ms": 0.0
   },
   "cases": [
@@ -113,9 +128,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 0.333333,
         "exact_match": 0.0,
         "token_f1": 0.769231,
         "token_recall": 1.0,
@@ -163,9 +180,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 1.0,
         "token_f1": 1.0,
         "token_recall": 1.0,
@@ -205,17 +224,6 @@
             5,
             6
           ]
-        },
-        {
-          "chunk_id": 3,
-          "score": 0.236833,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
-          "sentence_ids": [
-            9,
-            10,
-            11,
-            12
-          ]
         }
       ],
       "answer": "The company uses Python as its primary programming language\nfor several internal automation and AI projects.",
@@ -225,9 +233,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 0.5,
         "exact_match": 0.0,
         "token_f1": 0.75,
         "token_recall": 1.0,
@@ -264,9 +274,11 @@
         "answer_relevance": 0.5,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 0.0,
         "token_f1": 0.4,
         "token_recall": 1.0,
@@ -325,9 +337,11 @@
         "answer_relevance": 0.666667,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 0.666667,
         "exact_match": 0.0,
         "token_f1": 0.363636,
         "token_recall": 1.0,
@@ -367,17 +381,6 @@
             5,
             6
           ]
-        },
-        {
-          "chunk_id": 2,
-          "score": 0.161466,
-          "text": "Retrieval-Augmented Generation combines information retrieval\nwith language generation. It retrieves relevant document\nsections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is\nsupported by the provided context. Context relevance measures whether the retrieved information\nis relevant to the user's question.",
-          "sentence_ids": [
-            6,
-            7,
-            8,
-            9
-          ]
         }
       ],
       "answer": "The company uses Python as its primary programming language\nfor several internal automation and AI projects.",
@@ -387,9 +390,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 0.5,
         "exact_match": 0.0,
         "token_f1": 0.181818,
         "token_recall": 1.0,
@@ -428,16 +433,6 @@
             11,
             12
           ]
-        },
-        {
-          "chunk_id": 4,
-          "score": 0.286909,
-          "text": "The engineering team holds a planning meeting every Monday morning. Code changes are reviewed through pull requests on GitHub before\nthey are merged into the main branch. The evaluation suite is executed with pytest and runs as part of\nthe continuous integration pipeline.",
-          "sentence_ids": [
-            12,
-            13,
-            14
-          ]
         }
       ],
       "answer": "The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions.",
@@ -447,9 +442,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 0.5,
         "exact_match": 0.0,
         "token_f1": 0.857143,
         "token_recall": 1.0,
@@ -488,17 +485,6 @@
             5,
             6
           ]
-        },
-        {
-          "chunk_id": 3,
-          "score": 0.251835,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
-          "sentence_ids": [
-            9,
-            10,
-            11,
-            12
-          ]
         }
       ],
       "answer": "Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
@@ -508,9 +494,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 0.0,
         "token_f1": 0.666667,
         "token_recall": 0.6,
@@ -558,9 +546,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 0.5,
         "exact_match": 0.0,
         "token_f1": 0.875,
         "token_recall": 1.0,
@@ -608,9 +598,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 0.0,
         "token_f1": 0.823529,
         "token_recall": 1.0,
@@ -669,9 +661,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 0.333333,
         "exact_match": 0.0,
         "token_f1": 0.461538,
         "token_recall": 1.0,
@@ -719,9 +713,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 0.0,
         "token_f1": 0.545455,
         "token_recall": 1.0,
@@ -757,9 +753,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 0.0,
         "token_f1": 0.5,
         "token_recall": 1.0,
@@ -804,9 +802,11 @@
         "answer_relevance": 0.75,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 0.0,
         "token_f1": 0.2,
         "token_recall": 1.0,
@@ -832,17 +832,6 @@
             14,
             15
           ]
-        },
-        {
-          "chunk_id": 3,
-          "score": 0.152546,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
-          "sentence_ids": [
-            9,
-            10,
-            11,
-            12
-          ]
         }
       ],
       "answer": "Customer data is stored in an encrypted database that is backed up\nevery night.",
@@ -852,9 +841,11 @@
         "answer_relevance": 0.75,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 0.0,
         "token_f1": 0.4,
         "token_recall": 1.0,
@@ -871,26 +862,15 @@
       "question": "When does the company open its new London office?",
       "reference_answer": "",
       "answerable": false,
-      "retrieved": [
-        {
-          "chunk_id": 0,
-          "score": 0.220042,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
-          "sentence_ids": [
-            0,
-            1,
-            2,
-            3
-          ]
-        }
-      ],
+      "retrieved": [],
       "answer": "I don't know based on the available context.",
       "abstained": true,
       "metrics": {
-        "retrieval_relevance": 0.220042,
+        "retrieval_relevance": 0.0,
         "answer_relevance": 0.0,
         "faithfulness": 0.0,
         "abstained": 1.0,
+        "retrieval_rejected": 1.0,
         "abstention_correct": 1.0
       },
       "latency_ms": 0,
@@ -934,6 +914,7 @@
         "answer_relevance": 0.8,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "abstention_correct": 0.0
       },
       "latency_ms": 0,
@@ -954,6 +935,7 @@
         "answer_relevance": 0.0,
         "faithfulness": 0.0,
         "abstained": 1.0,
+        "retrieval_rejected": 1.0,
         "abstention_correct": 1.0
       },
       "latency_ms": 0,
@@ -974,6 +956,7 @@
         "answer_relevance": 0.0,
         "faithfulness": 0.0,
         "abstained": 1.0,
+        "retrieval_rejected": 1.0,
         "abstention_correct": 1.0
       },
       "latency_ms": 0,
@@ -997,17 +980,6 @@
             11,
             12
           ]
-        },
-        {
-          "chunk_id": 1,
-          "score": 0.250485,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
-          "sentence_ids": [
-            3,
-            4,
-            5,
-            6
-          ]
         }
       ],
       "answer": "The standard work week runs Monday through Friday.",
@@ -1017,9 +989,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 1.0,
         "token_f1": 1.0,
         "token_recall": 1.0,
@@ -1047,28 +1021,6 @@
             5,
             6
           ]
-        },
-        {
-          "chunk_id": 0,
-          "score": 0.183662,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
-          "sentence_ids": [
-            0,
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "chunk_id": 3,
-          "score": 0.183662,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
-          "sentence_ids": [
-            9,
-            10,
-            11,
-            12
-          ]
         }
       ],
       "answer": "The company encourages employees to improve their technical\nskills through practical projects and continuous learning.",
@@ -1078,9 +1030,11 @@
         "answer_relevance": 1.0,
         "faithfulness": 1.0,
         "abstained": 0.0,
+        "retrieval_rejected": 0.0,
         "hit_at_k": 1.0,
         "recall_at_k": 1.0,
         "reciprocal_rank": 1.0,
+        "precision_at_k": 1.0,
         "exact_match": 0.0,
         "token_f1": 0.571429,
         "token_recall": 1.0,

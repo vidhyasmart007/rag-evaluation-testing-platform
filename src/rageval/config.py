@@ -47,6 +47,29 @@ def _coerce(value: str) -> Any:
         return value
 
 
+#: The relevance floor for each retriever, expressed in that retriever's own
+#: score scale. The scales differ: the lexical retriever reports the
+#: fraction of the question's content words a chunk covers, while the dense
+#: retriever reports a cosine similarity.
+#:
+#: Each value sits in the middle of the window in which the retriever keeps
+#: every answerable case while rejecting as many unanswerable ones as it
+#: can. The windows are measured, not guessed, and the README lists them:
+#:
+#: ==========  ==========  ============================================
+#: Retriever   Floor       Safe window on the bundled dataset
+#: ==========  ==========  ============================================
+#: lexical     0.30        0.22 to 0.37
+#: dense       0.35        0.29 to 0.40
+#: hybrid      0.40        0.32 to 0.46
+#: ==========  ==========  ============================================
+DEFAULT_MIN_SCORES = {
+    "lexical": 0.30,
+    "dense": 0.35,
+    "hybrid": 0.40,
+}
+
+
 @dataclass
 class RetrievalConfig:
     """How documents are chunked and how relevant chunks are selected."""
@@ -55,7 +78,45 @@ class RetrievalConfig:
     top_k: int = 3
     chunk_size: int = 50
     chunk_overlap: int = 1
-    min_score: float = 0.15
+    min_score: float | None = None
+    lexical_weight: float = 0.5
+    dense_weight: float = 0.5
+
+    def to_dict(self) -> dict[str, Any]:
+        data = asdict(self)
+        data["min_score"] = self.resolved_min_score
+        return data
+
+    @property
+    def resolved_min_score(self) -> float:
+        """The relevance floor that will actually be applied.
+
+        ``min_score`` is an override. When it is left unset, each retriever
+        falls back to the floor that was calibrated for its own score
+        scale.
+        """
+        if self.min_score is not None:
+            return self.min_score
+        return DEFAULT_MIN_SCORES.get(self.retriever, 0.0)
+
+
+@dataclass
+class DenseConfig:
+    """Settings for the embedder that backs the dense retriever.
+
+    Ollama ignores the API key it is handed but insists on one being
+    present, so ``api_key_env`` is optional and is only needed for a proxy
+    that actually checks it. Like everywhere else in this project, the key
+    is referenced by environment variable name and never stored.
+    """
+
+    model: str = "embeddinggemma"
+    base_url: str = "http://localhost:11434/v1"
+    api_key_env: str | None = None
+    timeout_seconds: float = 120.0
+    batch_size: int = 16
+    query_prefix: str = ""
+    document_prefix: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -116,6 +177,7 @@ class EvalConfig:
     use_cache: bool = True
     correct_recall_threshold: float = 0.9
     retrieval: RetrievalConfig = field(default_factory=RetrievalConfig)
+    dense: DenseConfig = field(default_factory=DenseConfig)
     generation: GenerationConfig = field(default_factory=GenerationConfig)
     judge: JudgeConfig = field(default_factory=JudgeConfig)
 
@@ -129,6 +191,7 @@ class EvalConfig:
             "use_cache": self.use_cache,
             "correct_recall_threshold": self.correct_recall_threshold,
             "retrieval": self.retrieval.to_dict(),
+            "dense": self.dense.to_dict(),
             "generation": self.generation.to_dict(),
             "judge": self.judge.to_dict(),
         }
@@ -146,7 +209,11 @@ class EvalConfig:
                 f"Valid options: {', '.join(sorted(known))}."
             )
 
-        payload = {key: value for key, value in data.items() if key not in ("retrieval", "generation", "judge")}
+        payload = {
+            key: value
+            for key, value in data.items()
+            if key not in ("retrieval", "dense", "generation", "judge")
+        }
         for key in ("dataset_path", "knowledge_base_path", "reports_dir", "cache_dir"):
             if key in payload:
                 payload[key] = Path(payload[key]).expanduser()
@@ -154,6 +221,8 @@ class EvalConfig:
         config = cls(**payload)
         if "retrieval" in data:
             config.retrieval = _build(RetrievalConfig, data["retrieval"], "retrieval")
+        if "dense" in data:
+            config.dense = _build(DenseConfig, data["dense"], "dense")
         if "generation" in data:
             config.generation = _build(GenerationConfig, data["generation"], "generation")
         if "judge" in data:
@@ -197,6 +266,10 @@ class EvalConfig:
                 f"Invalid override path '{dotted}'. Expected section.field."
             )
 
-        if not hasattr(target, name):
+        # Only real fields can be set. Checking against the dataclass fields
+        # rather than with hasattr keeps read-only properties, such as the
+        # resolved relevance floor, out of reach.
+        known = {f.name for f in fields(target)}
+        if name not in known:
             raise ValueError(f"Unknown config option '{dotted}'.")
         setattr(target, name, value)
