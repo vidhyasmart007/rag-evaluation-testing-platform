@@ -77,7 +77,7 @@ serve:
 
 lint:
 	$(PYTHON) -m ruff check src tests streamlit_app.py
-	$(PYTHON) -m mypy src
+	$(PYTHON) -m mypy src streamlit_app.py
 
 clean:
 	rm -rf .pytest_cache .mypy_cache .ruff_cache .cache

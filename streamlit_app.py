@@ -65,7 +65,8 @@ def _metric_selectbox(label: str, runs: list[RunSummary], default: str) -> str:
     available = sorted({key for run in runs for key in run.metrics})
     if default not in available and available:
         default = available[0]
-    return st.selectbox(label, available, index=available.index(default))
+    chosen = st.selectbox(label, available, index=available.index(default))
+    return str(chosen)
 
 
 def _render_overview(runs: list[RunSummary], selected: RunSummary) -> None:
@@ -362,7 +363,7 @@ def main() -> None:
         return
 
     labels = [f"{run.run_id} · {run.label}" for run in runs]
-    chosen = st.sidebar.selectbox("Run", labels, index=0)
+    chosen = str(st.sidebar.selectbox("Run", labels, index=0))
     selected = runs[labels.index(chosen)]
     st.sidebar.caption(
         f"{selected.n_cases} cases · {selected.created_at or 'unknown date'}"
