@@ -88,7 +88,7 @@ def command_run(args: argparse.Namespace) -> int:
     print(f"Run id:       {run.run_id}")
     print(f"Dataset:      v{run.dataset_version} ({run.dataset_hash})")
     print(f"Commit:       {run.git_commit or 'unknown'}")
-    print(f"Generator:    {config.generation.provider}")
+    print(f"Generator:    {config.generation.provider} ({config.generation.model})")
     print(f"Retriever:    {config.retrieval.retriever} (top_k={config.retrieval.top_k})")
     print()
 
@@ -102,6 +102,23 @@ def command_run(args: argparse.Namespace) -> int:
         ["id", "answerable", "correct", "hit@k", "mrr", "abstained", "question"],
     )
     print()
+
+    abstentions = [case for case in run.cases if case.abstained]
+    if abstentions:
+        print("ABSTENTIONS")
+        _print_table(
+            [
+                {
+                    "id": case.test_id,
+                    "answerable": "yes" if case.answerable else "no",
+                    "reason": case.abstention_reason or "unspecified",
+                    "question": case.question[:52],
+                }
+                for case in abstentions
+            ],
+            ["id", "answerable", "reason", "question"],
+        )
+        print()
 
     errors = [case for case in run.cases if case.error]
     if errors:

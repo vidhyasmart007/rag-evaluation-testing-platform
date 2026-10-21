@@ -12,7 +12,7 @@ SRC := src
 PYTHONPATH := $(SRC)
 export PYTHONPATH
 
-.PHONY: help install run test cases config retrieve compare lint clean
+.PHONY: help install run test cases config retrieve compare compare-generators lint clean
 
 help:
 	@echo "Targets:"
@@ -23,6 +23,7 @@ help:
 	@echo "  config    print the effective configuration"
 	@echo "  retrieve  show what the retriever returns for a question"
 	@echo "  compare   compare the lexical, dense and hybrid retrievers"
+	@echo "  compare-generators  compare the extractive baseline against a model"
 	@echo "  lint      run ruff and mypy"
 	@echo "  clean     remove caches and generated reports"
 
@@ -53,6 +54,9 @@ retrieve:
 
 compare:
 	$(PYTHON) -m rageval.compare
+
+compare-generators:
+	$(PYTHON) -m rageval.compare --axis generator --model $(MODEL)
 
 lint:
 	$(PYTHON) -m ruff check src tests

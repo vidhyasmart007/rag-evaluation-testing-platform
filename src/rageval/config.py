@@ -70,6 +70,15 @@ DEFAULT_MIN_SCORES = {
 }
 
 
+#: The root of a local Ollama server. The language model generator talks to
+#: the native chat API under it, because that is the only endpoint that
+#: honours the ``think`` parameter.
+DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
+
+#: Ollama's OpenAI compatible prefix, used for embeddings.
+DEFAULT_OLLAMA_OPENAI_URL = "http://localhost:11434/v1"
+
+
 @dataclass
 class RetrievalConfig:
     """How documents are chunked and how relevant chunks are selected."""
@@ -111,7 +120,7 @@ class DenseConfig:
     """
 
     model: str = "embeddinggemma"
-    base_url: str = "http://localhost:11434/v1"
+    base_url: str = DEFAULT_OLLAMA_OPENAI_URL
     api_key_env: str | None = None
     timeout_seconds: float = 120.0
     batch_size: int = 16
@@ -128,6 +137,15 @@ class GenerationConfig:
 
     API keys are referenced by environment variable name rather than stored
     here, so that a configuration file can be committed safely.
+
+    ``min_answer_score`` applies to the extractive generator only. The
+    language model generator decides for itself whether to abstain, and a
+    guard rail applied around it would measure the guard rail rather than
+    the model.
+
+    ``think`` is passed through only when it is set, because it is a
+    parameter that only some models accept. Leaving it unset keeps the
+    request portable.
     """
 
     provider: str = "extractive"
@@ -138,6 +156,8 @@ class GenerationConfig:
     base_url: str | None = None
     api_key_env: str | None = None
     min_answer_score: float = 0.45
+    think: bool | None = None
+    timeout_seconds: float = 180.0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

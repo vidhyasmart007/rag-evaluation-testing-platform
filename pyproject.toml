@@ -15,7 +15,6 @@ dependencies = []
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 serve = ["streamlit>=1.40"]
-llm = ["openai>=1.40"]
 
 [project.scripts]
 rag-eval = "rageval.cli:main"

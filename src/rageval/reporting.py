@@ -22,6 +22,7 @@ _CSV_BASE_FIELDS = [
     "answerable",
     "answer",
     "abstained",
+    "abstention_reason",
     "retrieved_chunk_ids",
     "retrieved_sentence_ids",
     "top_score",
@@ -67,6 +68,7 @@ def write_reports(run: RunResult, config: EvalConfig) -> tuple[Path, Path]:
                 "answerable": case.answerable,
                 "answer": case.answer,
                 "abstained": case.abstained,
+                "abstention_reason": case.abstention_reason,
                 "retrieved_chunk_ids": ";".join(str(c.chunk_id) for c in case.retrieved),
                 "retrieved_sentence_ids": ";".join(
                     str(sid) for c in case.retrieved for sid in c.sentence_ids

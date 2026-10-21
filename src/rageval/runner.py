@@ -17,11 +17,12 @@ from pathlib import Path
 from time import perf_counter
 
 from rageval.cache import DiskCache, framework_fingerprint
-from rageval.config import EvalConfig
+from rageval.config import DEFAULT_OLLAMA_BASE_URL, EvalConfig
 from rageval.dataset import load_dataset
 from rageval.generation.base import GenerationResult, Generator
 from rageval.generation.cached import CachedGenerator
 from rageval.generation.extractive import ExtractiveGenerator
+from rageval.generation.ollama import OllamaGenerator
 from rageval.metrics.answer import (
     evaluate_answer_relevance,
     evaluate_faithfulness,
@@ -120,14 +121,37 @@ def build_retriever(config: EvalConfig, document: str) -> Retriever:
 def build_generator(config: EvalConfig) -> Generator:
     """Create the generator described by the configuration."""
     provider = config.generation.provider
+    generation = config.generation
+
     if provider == "extractive":
         generator: Generator = ExtractiveGenerator(
-            min_answer_score=config.generation.min_answer_score
+            min_answer_score=generation.min_answer_score
+        )
+    elif provider == "ollama":
+        if not generation.model or generation.model == "extractive":
+            raise ValueError(
+                "The ollama provider needs a model. Set generation.model to "
+                "the name of a model Ollama has, for example 'qwen3:1.7b'."
+            )
+
+        api_key = None
+        if generation.api_key_env:
+            api_key = os.environ.get(generation.api_key_env)
+
+        generator = OllamaGenerator(
+            generation.model,
+            base_url=generation.base_url or DEFAULT_OLLAMA_BASE_URL,
+            api_key=api_key,
+            temperature=generation.temperature,
+            seed=generation.seed,
+            max_tokens=generation.max_tokens,
+            timeout=generation.timeout_seconds,
+            think=generation.think,
         )
     else:
         raise ValueError(
-            f"Unknown generation provider '{provider}'. Available: extractive. "
-            "The Ollama provider lands in a later phase."
+            f"Unknown generation provider '{provider}'. "
+            "Available: extractive, ollama."
         )
 
     if config.use_cache:
@@ -234,6 +258,7 @@ def evaluate_case(
             retrieved=chunks,
             answer=generated.text,
             abstained=generated.abstained,
+            abstention_reason=generated.reason,
             metrics=compute_metrics(case, chunks, generated, context, config),
             latency_ms=latency_ms,
             generator=generated.model,

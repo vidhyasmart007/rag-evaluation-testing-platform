@@ -41,6 +41,11 @@ def split_into_sentences(text: str) -> list[str]:
     paragraph is split on sentence punctuation. A heading therefore stays
     its own sentence instead of being glued to the first line of the
     paragraph that follows it.
+
+    Each sentence is collapsed onto a single line. The source document may
+    be hard-wrapped, and a sentence that spans two lines would otherwise
+    break the convention that a chunk is one line, which is what makes the
+    context handed to a language model unambiguous.
     """
     sentences: list[str] = []
     for paragraph in _PARAGRAPH_BREAK_RE.split(text):
@@ -48,7 +53,7 @@ def split_into_sentences(text: str) -> list[str]:
         if not paragraph:
             continue
         for sentence in _SENTENCE_BREAK_RE.split(paragraph):
-            sentence = sentence.strip()
+            sentence = " ".join(sentence.split())
             if sentence:
                 sentences.append(sentence)
     return sentences

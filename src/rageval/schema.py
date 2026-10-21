@@ -115,6 +115,7 @@ class CaseResult:
     retrieved: list[RetrievedChunk] = field(default_factory=list)
     answer: str = ""
     abstained: bool = False
+    abstention_reason: str = ""
     metrics: dict[str, float] = field(default_factory=dict)
     latency_ms: int = 0
     generator: str = ""
@@ -138,6 +139,7 @@ class CaseResult:
             ],
             "answer": self.answer,
             "abstained": self.abstained,
+            "abstention_reason": self.abstention_reason,
             "metrics": self.metrics,
             "latency_ms": self.latency_ms,
             "generator": self.generator,

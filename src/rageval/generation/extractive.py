@@ -20,9 +20,15 @@ better overall operating point.
 
 from __future__ import annotations
 
+from typing import Any
+
 from rageval.generation.base import ABSTAINED_ANSWER, GenerationResult
 from rageval.retrieval.lexical import split_into_sentences
 from rageval.text import coverage, stemmed_tokens
+
+REASON_EMPTY_CONTEXT = "empty_context"
+REASON_NO_QUESTION_TOKENS = "no_question_tokens"
+REASON_BELOW_THRESHOLD = "below_min_answer_score"
 
 
 def _unique_sentences(sentences: list[str]) -> list[str]:
@@ -49,12 +55,18 @@ class ExtractiveGenerator:
     def __init__(self, *, min_answer_score: float = 0.45) -> None:
         self.min_answer_score = min_answer_score
 
+    @property
+    def cache_key(self) -> dict[str, Any]:
+        """The threshold decides whether the generator answers at all."""
+        return {"min_answer_score": self.min_answer_score}
+
     def generate(self, question: str, context: str) -> GenerationResult:
         if not context.strip():
             return GenerationResult(
                 text=ABSTAINED_ANSWER,
                 model=self.name,
                 abstained=True,
+                reason=REASON_EMPTY_CONTEXT,
             )
 
         query_tokens = set(stemmed_tokens(question))
@@ -63,6 +75,7 @@ class ExtractiveGenerator:
                 text=ABSTAINED_ANSWER,
                 model=self.name,
                 abstained=True,
+                reason=REASON_NO_QUESTION_TOKENS,
             )
 
         sentences = _unique_sentences(split_into_sentences(context))
@@ -71,6 +84,7 @@ class ExtractiveGenerator:
                 text=ABSTAINED_ANSWER,
                 model=self.name,
                 abstained=True,
+                reason=REASON_EMPTY_CONTEXT,
             )
 
         best_sentence = ""
@@ -86,6 +100,7 @@ class ExtractiveGenerator:
                 text=ABSTAINED_ANSWER,
                 model=self.name,
                 abstained=True,
+                reason=REASON_BELOW_THRESHOLD,
             )
 
         return GenerationResult(

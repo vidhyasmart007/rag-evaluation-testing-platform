@@ -6,13 +6,16 @@ regenerated. Serving those repeats from disk turns them into free lookups,
 which matters a great deal once the generator is a hosted model with a
 per-day request cap.
 
-The cache key covers the question, the retrieved context and the model
-name, so a change to the retriever invalidates the entry automatically.
-The package fingerprint is part of the namespace, so a change to the
-code invalidates it too.
+The cache key covers the question, the retrieved context, the model name and
+whatever the generator says changes its own output, so a change to the
+retriever or to a generation setting invalidates the entry automatically.
+The package fingerprint is part of the namespace, so a change to the code
+invalidates it too.
 """
 
 from __future__ import annotations
+
+from typing import Any
 
 from rageval.cache import DiskCache
 from rageval.generation.base import GenerationResult, Generator
@@ -31,6 +34,7 @@ class CachedGenerator:
         self.cache = cache
         self.namespace = namespace
         self.name = inner.name
+        self.cache_key: dict[str, Any] = dict(getattr(inner, "cache_key", {}))
 
     def generate(self, question: str, context: str) -> GenerationResult:
         key = DiskCache.make_key(
@@ -38,6 +42,7 @@ class CachedGenerator:
             model=self.inner.name,
             question=question,
             context=context,
+            **self.cache_key,
         )
 
         cached = self.cache.get(key)
@@ -49,6 +54,7 @@ class CachedGenerator:
                 completion_tokens=int(cached.get("completion_tokens", 0)),
                 cached=True,
                 abstained=bool(cached.get("abstained", False)),
+                reason=str(cached.get("reason", "")),
             )
 
         result = self.inner.generate(question, context)
@@ -60,6 +66,7 @@ class CachedGenerator:
                 "prompt_tokens": result.prompt_tokens,
                 "completion_tokens": result.completion_tokens,
                 "abstained": result.abstained,
+                "reason": result.reason,
             },
         )
         return result

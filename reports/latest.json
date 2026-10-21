@@ -1,6 +1,6 @@
 {
   "run_id": "baseline",
-  "created_at": "2026-10-21T10:56:36.843129+00:00",
+  "created_at": "2026-10-21T11:49:19.287656+00:00",
   "config": {
     "dataset_path": "/Users/vidhya/Documents/llm-evaluation-framework/data/eval_dataset.json",
     "knowledge_base_path": "/Users/vidhya/Documents/llm-evaluation-framework/data/knowledge_base.txt",
@@ -35,7 +35,9 @@
       "max_tokens": 256,
       "base_url": null,
       "api_key_env": null,
-      "min_answer_score": 0.45
+      "min_answer_score": 0.45,
+      "think": null,
+      "timeout_seconds": 180.0
     },
     "judge": {
       "enabled": false,
@@ -51,7 +53,7 @@
   },
   "dataset_version": "2.0.0",
   "dataset_hash": "9ce479197df77dd8",
-  "git_commit": "35a93fc",
+  "git_commit": "deb3e80",
   "aggregates": {
     "abstained": 0.1429,
     "abstention_correct": 0.9524,
@@ -72,7 +74,7 @@
     "answerable_cases": 17.0,
     "unanswerable_cases": 4.0,
     "error_count": 0.0,
-    "cache_hits": 0.0,
+    "cache_hits": 21.0,
     "abstention_rate": 0.1429,
     "unanswerable_abstention_rate": 0.75,
     "hallucination_rate": 0.25,
@@ -90,7 +92,7 @@
         {
           "chunk_id": 0,
           "score": 1.0,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
+          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language for several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
           "sentence_ids": [
             0,
             1,
@@ -101,7 +103,7 @@
         {
           "chunk_id": 3,
           "score": 0.310328,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
+          "text": "Context relevance measures whether the retrieved information is relevant to the user's question. The company employs approximately 120 people across engineering, sales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
           "sentence_ids": [
             9,
             10,
@@ -112,7 +114,7 @@
         {
           "chunk_id": 1,
           "score": 0.310328,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -123,6 +125,7 @@
       ],
       "answer": "Company Knowledge Base The company office is located in Bengaluru, Karnataka.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -141,7 +144,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -153,7 +156,7 @@
         {
           "chunk_id": 0,
           "score": 1.0,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
+          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language for several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
           "sentence_ids": [
             0,
             1,
@@ -164,7 +167,7 @@
         {
           "chunk_id": 1,
           "score": 1.0,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -175,6 +178,7 @@
       ],
       "answer": "Employees receive 18 annual leave days per calendar year.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -194,7 +198,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -206,7 +210,7 @@
         {
           "chunk_id": 0,
           "score": 1.0,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
+          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language for several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
           "sentence_ids": [
             0,
             1,
@@ -217,7 +221,7 @@
         {
           "chunk_id": 1,
           "score": 0.473665,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -226,8 +230,9 @@
           ]
         }
       ],
-      "answer": "The company uses Python as its primary programming language\nfor several internal automation and AI projects.",
+      "answer": "The company uses Python as its primary programming language for several internal automation and AI projects.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -246,7 +251,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -258,7 +263,7 @@
         {
           "chunk_id": 0,
           "score": 0.368571,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
+          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language for several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
           "sentence_ids": [
             0,
             1,
@@ -269,6 +274,7 @@
       ],
       "answer": "Company Knowledge Base The company office is located in Bengaluru, Karnataka.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 0.368571,
         "answer_relevance": 0.5,
@@ -287,7 +293,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -299,7 +305,7 @@
         {
           "chunk_id": 0,
           "score": 0.572061,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
+          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language for several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
           "sentence_ids": [
             0,
             1,
@@ -310,7 +316,7 @@
         {
           "chunk_id": 1,
           "score": 0.572061,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -321,7 +327,7 @@
         {
           "chunk_id": 2,
           "score": 0.427939,
-          "text": "Retrieval-Augmented Generation combines information retrieval\nwith language generation. It retrieves relevant document\nsections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is\nsupported by the provided context. Context relevance measures whether the retrieved information\nis relevant to the user's question.",
+          "text": "Retrieval-Augmented Generation combines information retrieval with language generation. It retrieves relevant document sections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is supported by the provided context. Context relevance measures whether the retrieved information is relevant to the user's question.",
           "sentence_ids": [
             6,
             7,
@@ -332,6 +338,7 @@
       ],
       "answer": "Employees receive 18 annual leave days per calendar year.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 0.572061,
         "answer_relevance": 0.666667,
@@ -351,7 +358,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -363,7 +370,7 @@
         {
           "chunk_id": 0,
           "score": 1.0,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
+          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language for several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
           "sentence_ids": [
             0,
             1,
@@ -374,7 +381,7 @@
         {
           "chunk_id": 1,
           "score": 0.641159,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -383,8 +390,9 @@
           ]
         }
       ],
-      "answer": "The company uses Python as its primary programming language\nfor several internal automation and AI projects.",
+      "answer": "The company uses Python as its primary programming language for several internal automation and AI projects.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -403,7 +411,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -415,7 +423,7 @@
         {
           "chunk_id": 1,
           "score": 1.0,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -426,7 +434,7 @@
         {
           "chunk_id": 3,
           "score": 0.713091,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
+          "text": "Context relevance measures whether the retrieved information is relevant to the user's question. The company employs approximately 120 people across engineering, sales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
           "sentence_ids": [
             9,
             10,
@@ -435,8 +443,9 @@
           ]
         }
       ],
-      "answer": "The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions.",
+      "answer": "The AI team works on machine learning, large language models, AI evaluation, and automation solutions.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -455,7 +464,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -467,7 +476,7 @@
         {
           "chunk_id": 2,
           "score": 1.0,
-          "text": "Retrieval-Augmented Generation combines information retrieval\nwith language generation. It retrieves relevant document\nsections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is\nsupported by the provided context. Context relevance measures whether the retrieved information\nis relevant to the user's question.",
+          "text": "Retrieval-Augmented Generation combines information retrieval with language generation. It retrieves relevant document sections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is supported by the provided context. Context relevance measures whether the retrieved information is relevant to the user's question.",
           "sentence_ids": [
             6,
             7,
@@ -478,7 +487,7 @@
         {
           "chunk_id": 1,
           "score": 1.0,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -487,8 +496,9 @@
           ]
         }
       ],
-      "answer": "Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+      "answer": "Retrieval-Augmented Generation combines information retrieval with language generation.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -507,7 +517,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -519,7 +529,7 @@
         {
           "chunk_id": 2,
           "score": 1.0,
-          "text": "Retrieval-Augmented Generation combines information retrieval\nwith language generation. It retrieves relevant document\nsections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is\nsupported by the provided context. Context relevance measures whether the retrieved information\nis relevant to the user's question.",
+          "text": "Retrieval-Augmented Generation combines information retrieval with language generation. It retrieves relevant document sections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is supported by the provided context. Context relevance measures whether the retrieved information is relevant to the user's question.",
           "sentence_ids": [
             6,
             7,
@@ -530,7 +540,7 @@
         {
           "chunk_id": 3,
           "score": 0.40062,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
+          "text": "Context relevance measures whether the retrieved information is relevant to the user's question. The company employs approximately 120 people across engineering, sales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
           "sentence_ids": [
             9,
             10,
@@ -539,8 +549,9 @@
           ]
         }
       ],
-      "answer": "Faithfulness measures whether an AI-generated answer is\nsupported by the provided context.",
+      "answer": "Faithfulness measures whether an AI-generated answer is supported by the provided context.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -559,7 +570,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -571,7 +582,7 @@
         {
           "chunk_id": 2,
           "score": 1.0,
-          "text": "Retrieval-Augmented Generation combines information retrieval\nwith language generation. It retrieves relevant document\nsections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is\nsupported by the provided context. Context relevance measures whether the retrieved information\nis relevant to the user's question.",
+          "text": "Retrieval-Augmented Generation combines information retrieval with language generation. It retrieves relevant document sections and uses them as context for answering questions. Faithfulness measures whether an AI-generated answer is supported by the provided context. Context relevance measures whether the retrieved information is relevant to the user's question.",
           "sentence_ids": [
             6,
             7,
@@ -582,7 +593,7 @@
         {
           "chunk_id": 3,
           "score": 1.0,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
+          "text": "Context relevance measures whether the retrieved information is relevant to the user's question. The company employs approximately 120 people across engineering, sales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
           "sentence_ids": [
             9,
             10,
@@ -591,8 +602,9 @@
           ]
         }
       ],
-      "answer": "Context relevance measures whether the retrieved information\nis relevant to the user's question.",
+      "answer": "Context relevance measures whether the retrieved information is relevant to the user's question.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -611,7 +623,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -623,7 +635,7 @@
         {
           "chunk_id": 3,
           "score": 1.0,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
+          "text": "Context relevance measures whether the retrieved information is relevant to the user's question. The company employs approximately 120 people across engineering, sales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
           "sentence_ids": [
             9,
             10,
@@ -634,7 +646,7 @@
         {
           "chunk_id": 0,
           "score": 0.473665,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
+          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language for several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
           "sentence_ids": [
             0,
             1,
@@ -645,7 +657,7 @@
         {
           "chunk_id": 1,
           "score": 0.473665,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -654,8 +666,9 @@
           ]
         }
       ],
-      "answer": "The company employs approximately 120 people across engineering,\nsales, and customer support.",
+      "answer": "The company employs approximately 120 people across engineering, sales, and customer support.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -675,7 +688,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -687,7 +700,7 @@
         {
           "chunk_id": 3,
           "score": 1.0,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
+          "text": "Context relevance measures whether the retrieved information is relevant to the user's question. The company employs approximately 120 people across engineering, sales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
           "sentence_ids": [
             9,
             10,
@@ -698,7 +711,7 @@
         {
           "chunk_id": 4,
           "score": 1.0,
-          "text": "The engineering team holds a planning meeting every Monday morning. Code changes are reviewed through pull requests on GitHub before\nthey are merged into the main branch. The evaluation suite is executed with pytest and runs as part of\nthe continuous integration pipeline.",
+          "text": "The engineering team holds a planning meeting every Monday morning. Code changes are reviewed through pull requests on GitHub before they are merged into the main branch. The evaluation suite is executed with pytest and runs as part of the continuous integration pipeline.",
           "sentence_ids": [
             12,
             13,
@@ -708,6 +721,7 @@
       ],
       "answer": "The engineering team holds a planning meeting every Monday morning.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -726,7 +740,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -738,7 +752,7 @@
         {
           "chunk_id": 4,
           "score": 1.0,
-          "text": "The engineering team holds a planning meeting every Monday morning. Code changes are reviewed through pull requests on GitHub before\nthey are merged into the main branch. The evaluation suite is executed with pytest and runs as part of\nthe continuous integration pipeline.",
+          "text": "The engineering team holds a planning meeting every Monday morning. Code changes are reviewed through pull requests on GitHub before they are merged into the main branch. The evaluation suite is executed with pytest and runs as part of the continuous integration pipeline.",
           "sentence_ids": [
             12,
             13,
@@ -746,8 +760,9 @@
           ]
         }
       ],
-      "answer": "Code changes are reviewed through pull requests on GitHub before\nthey are merged into the main branch.",
+      "answer": "Code changes are reviewed through pull requests on GitHub before they are merged into the main branch.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -766,7 +781,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -778,7 +793,7 @@
         {
           "chunk_id": 5,
           "score": 0.477928,
-          "text": "The evaluation suite is executed with pytest and runs as part of\nthe continuous integration pipeline. Customer data is stored in an encrypted database that is backed up\nevery night.",
+          "text": "The evaluation suite is executed with pytest and runs as part of the continuous integration pipeline. Customer data is stored in an encrypted database that is backed up every night.",
           "sentence_ids": [
             14,
             15
@@ -787,7 +802,7 @@
         {
           "chunk_id": 4,
           "score": 0.477928,
-          "text": "The engineering team holds a planning meeting every Monday morning. Code changes are reviewed through pull requests on GitHub before\nthey are merged into the main branch. The evaluation suite is executed with pytest and runs as part of\nthe continuous integration pipeline.",
+          "text": "The engineering team holds a planning meeting every Monday morning. Code changes are reviewed through pull requests on GitHub before they are merged into the main branch. The evaluation suite is executed with pytest and runs as part of the continuous integration pipeline.",
           "sentence_ids": [
             12,
             13,
@@ -795,8 +810,9 @@
           ]
         }
       ],
-      "answer": "The evaluation suite is executed with pytest and runs as part of\nthe continuous integration pipeline.",
+      "answer": "The evaluation suite is executed with pytest and runs as part of the continuous integration pipeline.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 0.477928,
         "answer_relevance": 0.75,
@@ -815,7 +831,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -827,15 +843,16 @@
         {
           "chunk_id": 5,
           "score": 0.609003,
-          "text": "The evaluation suite is executed with pytest and runs as part of\nthe continuous integration pipeline. Customer data is stored in an encrypted database that is backed up\nevery night.",
+          "text": "The evaluation suite is executed with pytest and runs as part of the continuous integration pipeline. Customer data is stored in an encrypted database that is backed up every night.",
           "sentence_ids": [
             14,
             15
           ]
         }
       ],
-      "answer": "Customer data is stored in an encrypted database that is backed up\nevery night.",
+      "answer": "Customer data is stored in an encrypted database that is backed up every night.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 0.609003,
         "answer_relevance": 0.75,
@@ -854,7 +871,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -865,6 +882,7 @@
       "retrieved": [],
       "answer": "I don't know based on the available context.",
       "abstained": true,
+      "abstention_reason": "empty_context",
       "metrics": {
         "retrieval_relevance": 0.0,
         "answer_relevance": 0.0,
@@ -875,7 +893,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -887,7 +905,7 @@
         {
           "chunk_id": 0,
           "score": 0.589,
-          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language\nfor several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
+          "text": "Company Knowledge Base The company office is located in Bengaluru, Karnataka. The company uses Python as its primary programming language for several internal automation and AI projects. Employees receive 18 annual leave days per calendar year.",
           "sentence_ids": [
             0,
             1,
@@ -898,7 +916,7 @@
         {
           "chunk_id": 1,
           "score": 0.589,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -909,6 +927,7 @@
       ],
       "answer": "Employees receive 18 annual leave days per calendar year.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 0.589,
         "answer_relevance": 0.8,
@@ -919,7 +938,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -930,6 +949,7 @@
       "retrieved": [],
       "answer": "I don't know based on the available context.",
       "abstained": true,
+      "abstention_reason": "empty_context",
       "metrics": {
         "retrieval_relevance": 0.0,
         "answer_relevance": 0.0,
@@ -940,7 +960,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -951,6 +971,7 @@
       "retrieved": [],
       "answer": "I don't know based on the available context.",
       "abstained": true,
+      "abstention_reason": "empty_context",
       "metrics": {
         "retrieval_relevance": 0.0,
         "answer_relevance": 0.0,
@@ -961,7 +982,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -973,7 +994,7 @@
         {
           "chunk_id": 3,
           "score": 1.0,
-          "text": "Context relevance measures whether the retrieved information\nis relevant to the user's question. The company employs approximately 120 people across engineering,\nsales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
+          "text": "Context relevance measures whether the retrieved information is relevant to the user's question. The company employs approximately 120 people across engineering, sales, and customer support. The standard work week runs Monday through Friday. The engineering team holds a planning meeting every Monday morning.",
           "sentence_ids": [
             9,
             10,
@@ -984,6 +1005,7 @@
       ],
       "answer": "The standard work week runs Monday through Friday.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -1002,7 +1024,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     },
     {
@@ -1014,7 +1036,7 @@
         {
           "chunk_id": 1,
           "score": 1.0,
-          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models,\nAI evaluation, and automation solutions. The company encourages employees to improve their technical\nskills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval\nwith language generation.",
+          "text": "Employees receive 18 annual leave days per calendar year. The AI team works on machine learning, large language models, AI evaluation, and automation solutions. The company encourages employees to improve their technical skills through practical projects and continuous learning. Retrieval-Augmented Generation combines information retrieval with language generation.",
           "sentence_ids": [
             3,
             4,
@@ -1023,8 +1045,9 @@
           ]
         }
       ],
-      "answer": "The company encourages employees to improve their technical\nskills through practical projects and continuous learning.",
+      "answer": "The company encourages employees to improve their technical skills through practical projects and continuous learning.",
       "abstained": false,
+      "abstention_reason": "",
       "metrics": {
         "retrieval_relevance": 1.0,
         "answer_relevance": 1.0,
@@ -1043,7 +1066,7 @@
       },
       "latency_ms": 0,
       "generator": "extractive",
-      "cached": false,
+      "cached": true,
       "error": null
     }
   ]
