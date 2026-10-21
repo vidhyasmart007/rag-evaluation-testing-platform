@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-evaluation-platform"
+version = "0.2.0"
+description = "Evaluation and testing platform for retrieval-augmented generation pipelines."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Vidhya A" }]
+keywords = ["rag", "evaluation", "llm", "retrieval", "testing"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+serve = ["streamlit>=1.40"]
+llm = ["openai>=1.40"]
+
+[project.scripts]
+rag-eval = "rageval.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 90
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "src"
+packages = ["rageval"]
+warn_unused_ignores = true
+ignore_missing_imports = true

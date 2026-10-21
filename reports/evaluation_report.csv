@@ -1,7 +1,0 @@
-test_id,question,expected_answer,actual_answer,result
-1,Where is the company office?,The company office is in Bengaluru.,The company office is in Bengaluru.,PASS
-2,How many annual leave days are provided?,Employees receive 20 days of annual leave.,Employees receive 10 days of annual leave.,FAIL
-3,Which programming language is used?,Python is used.,Python is used.,PASS
-4,What is the office location?,Bengaluru,bengaluru,PASS
-5,How many leave days are provided?,20 days,I do not know.,FAIL
-6,Which language are we learning?,Python,python,PASS

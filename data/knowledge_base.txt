@@ -22,3 +22,19 @@ supported by the provided context.
 
 Context relevance measures whether the retrieved information
 is relevant to the user's question.
+
+The company employs approximately 120 people across engineering,
+sales, and customer support.
+
+The standard work week runs Monday through Friday.
+
+The engineering team holds a planning meeting every Monday morning.
+
+Code changes are reviewed through pull requests on GitHub before
+they are merged into the main branch.
+
+The evaluation suite is executed with pytest and runs as part of
+the continuous integration pipeline.
+
+Customer data is stored in an encrypted database that is backed up
+every night.

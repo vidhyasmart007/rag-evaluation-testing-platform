@@ -1,38 +1,195 @@
-[
+{
+  "version": "2.0.0",
+  "description": "Evaluation set for the company knowledge base. Relevant sentence ids point at the numbered sentences of data/knowledge_base.txt, counting from zero.",
+  "cases": [
     {
-        "id": 1,
-        "question": "Where is the company office?",
-        "expected_answer": "The company office is in Bengaluru.",
-        "actual_answer": "The company office is in Bengaluru."
+      "id": 1,
+      "question": "Where is the company office?",
+      "reference_answer": "The company office is located in Bengaluru, Karnataka.",
+      "answerable": true,
+      "relevant_sentence_ids": [1],
+      "difficulty": "easy",
+      "tags": ["policy"]
     },
     {
-        "id": 2,
-        "question": "How many annual leave days are provided?",
-        "expected_answer": "Employees receive 20 days of annual leave.",
-        "actual_answer": "Employees receive 10 days of annual leave."
+      "id": 2,
+      "question": "How many annual leave days do employees receive?",
+      "reference_answer": "Employees receive 18 annual leave days per calendar year.",
+      "answerable": true,
+      "relevant_sentence_ids": [3],
+      "difficulty": "easy",
+      "tags": ["policy"]
     },
     {
-        "id": 3,
-        "question": "Which programming language is used?",
-        "expected_answer": "Python is used.",
-        "actual_answer": "Python is used."
+      "id": 3,
+      "question": "Which programming language does the company use?",
+      "reference_answer": "The company uses Python as its primary programming language.",
+      "answerable": true,
+      "relevant_sentence_ids": [2],
+      "difficulty": "easy",
+      "tags": ["engineering"]
     },
     {
-        "id": 4,
-        "question": "What is the office location?",
-        "expected_answer": "Bengaluru",
-        "actual_answer": "bengaluru"
+      "id": 4,
+      "question": "Which city is the office in?",
+      "reference_answer": "Bengaluru, Karnataka.",
+      "answerable": true,
+      "relevant_sentence_ids": [1],
+      "difficulty": "easy",
+      "tags": ["policy"]
     },
     {
-        "id": 5,
-        "question": "How many leave days are provided?",
-        "expected_answer": "20 days",
-        "actual_answer": "I do not know."
+      "id": 5,
+      "question": "How many leave days are provided?",
+      "reference_answer": "18 days",
+      "answerable": true,
+      "relevant_sentence_ids": [3],
+      "difficulty": "medium",
+      "tags": ["policy"]
     },
     {
-        "id": 6,
-        "question": "Which language are we learning?",
-        "expected_answer": "Python",
-        "actual_answer": "python"
+      "id": 6,
+      "question": "Which programming language is used for the automation projects?",
+      "reference_answer": "Python",
+      "answerable": true,
+      "relevant_sentence_ids": [2],
+      "difficulty": "medium",
+      "tags": ["engineering", "disambiguation"]
+    },
+    {
+      "id": 7,
+      "question": "What does the AI team work on?",
+      "reference_answer": "Machine learning, large language models, AI evaluation, and automation solutions.",
+      "answerable": true,
+      "relevant_sentence_ids": [4],
+      "difficulty": "easy",
+      "tags": ["engineering"]
+    },
+    {
+      "id": 8,
+      "question": "What is Retrieval-Augmented Generation?",
+      "reference_answer": "It combines information retrieval with language generation to answer questions using retrieved document sections.",
+      "answerable": true,
+      "relevant_sentence_ids": [6, 7],
+      "difficulty": "medium",
+      "tags": ["concepts"]
+    },
+    {
+      "id": 9,
+      "question": "What does faithfulness measure?",
+      "reference_answer": "Whether an AI-generated answer is supported by the provided context.",
+      "answerable": true,
+      "relevant_sentence_ids": [8],
+      "difficulty": "medium",
+      "tags": ["concepts"]
+    },
+    {
+      "id": 10,
+      "question": "What does context relevance measure?",
+      "reference_answer": "Whether the retrieved information is relevant to the user's question.",
+      "answerable": true,
+      "relevant_sentence_ids": [9],
+      "difficulty": "medium",
+      "tags": ["concepts"]
+    },
+    {
+      "id": 11,
+      "question": "How many people does the company employ?",
+      "reference_answer": "Approximately 120 people.",
+      "answerable": true,
+      "relevant_sentence_ids": [10],
+      "difficulty": "easy",
+      "tags": ["policy"]
+    },
+    {
+      "id": 12,
+      "question": "When is the engineering planning meeting?",
+      "reference_answer": "Every Monday morning.",
+      "answerable": true,
+      "relevant_sentence_ids": [12],
+      "difficulty": "easy",
+      "tags": ["process"]
+    },
+    {
+      "id": 13,
+      "question": "How is code reviewed before it is merged?",
+      "reference_answer": "Through pull requests on GitHub.",
+      "answerable": true,
+      "relevant_sentence_ids": [13],
+      "difficulty": "medium",
+      "tags": ["process"]
+    },
+    {
+      "id": 14,
+      "question": "What tool runs the evaluation suite?",
+      "reference_answer": "pytest",
+      "answerable": true,
+      "relevant_sentence_ids": [14],
+      "difficulty": "medium",
+      "tags": ["engineering"]
+    },
+    {
+      "id": 15,
+      "question": "How often is customer data backed up?",
+      "reference_answer": "Every night.",
+      "answerable": true,
+      "relevant_sentence_ids": [15],
+      "difficulty": "easy",
+      "tags": ["policy"]
+    },
+    {
+      "id": 16,
+      "question": "When does the company open its new London office?",
+      "reference_answer": "",
+      "answerable": false,
+      "relevant_sentence_ids": [],
+      "difficulty": "hard",
+      "tags": ["unanswerable", "partial-overlap"]
+    },
+    {
+      "id": 17,
+      "question": "How many sick leave days do employees receive?",
+      "reference_answer": "",
+      "answerable": false,
+      "relevant_sentence_ids": [],
+      "difficulty": "hard",
+      "tags": ["unanswerable", "partial-overlap"]
+    },
+    {
+      "id": 18,
+      "question": "What is the name of the chief executive officer?",
+      "reference_answer": "",
+      "answerable": false,
+      "relevant_sentence_ids": [],
+      "difficulty": "hard",
+      "tags": ["unanswerable"]
+    },
+    {
+      "id": 19,
+      "question": "What is the capital of Mars?",
+      "reference_answer": "",
+      "answerable": false,
+      "relevant_sentence_ids": [],
+      "difficulty": "hard",
+      "tags": ["unanswerable"]
+    },
+    {
+      "id": 20,
+      "question": "What is the standard work week?",
+      "reference_answer": "The standard work week runs Monday through Friday.",
+      "answerable": true,
+      "relevant_sentence_ids": [11],
+      "difficulty": "easy",
+      "tags": ["policy"]
+    },
+    {
+      "id": 21,
+      "question": "How does the company encourage employees to improve their technical skills?",
+      "reference_answer": "Through practical projects and continuous learning.",
+      "answerable": true,
+      "relevant_sentence_ids": [5],
+      "difficulty": "medium",
+      "tags": ["policy"]
     }
-]
+  ]
+}
