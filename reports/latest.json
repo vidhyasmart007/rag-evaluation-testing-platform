@@ -1,12 +1,12 @@
 {
-  "run_id": "run_20261021_100024",
-  "created_at": "2026-10-21T10:00:24.074555+00:00",
+  "run_id": "baseline",
+  "created_at": "2026-10-21T10:00:48.185694+00:00",
   "config": {
     "dataset_path": "/Users/vidhya/Documents/llm-evaluation-framework/data/eval_dataset.json",
     "knowledge_base_path": "/Users/vidhya/Documents/llm-evaluation-framework/data/knowledge_base.txt",
     "reports_dir": "/Users/vidhya/Documents/llm-evaluation-framework/reports",
     "cache_dir": "/Users/vidhya/Documents/llm-evaluation-framework/.cache",
-    "run_name": "",
+    "run_name": "baseline",
     "use_cache": true,
     "correct_recall_threshold": 0.9,
     "retrieval": {
@@ -40,7 +40,7 @@
   },
   "dataset_version": "2.0.0",
   "dataset_hash": "9ce479197df77dd8",
-  "git_commit": "7476c77",
+  "git_commit": "229d5a7",
   "aggregates": {
     "abstained": 0.1429,
     "abstention_correct": 0.9524,
