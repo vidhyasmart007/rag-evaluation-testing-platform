@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "question": "Where is the company office?",
+        "expected_answer": "The company office is in Bengaluru.",
+        "actual_answer": "The company office is in Bengaluru."
+    },
+    {
+        "id": 2,
+        "question": "How many annual leave days are provided?",
+        "expected_answer": "Employees receive 20 days of annual leave.",
+        "actual_answer": "Employees receive 10 days of annual leave."
+    },
+    {
+        "id": 3,
+        "question": "Which programming language is used?",
+        "expected_answer": "Python is used.",
+        "actual_answer": "Python is used."
+    },
+    {
+        "id": 4,
+        "question": "What is the office location?",
+        "expected_answer": "Bengaluru",
+        "actual_answer": "bengaluru"
+    },
+    {
+        "id": 5,
+        "question": "How many leave days are provided?",
+        "expected_answer": "20 days",
+        "actual_answer": "I do not know."
+    },
+    {
+        "id": 6,
+        "question": "Which language are we learning?",
+        "expected_answer": "Python",
+        "actual_answer": "python"
+    }
+]
